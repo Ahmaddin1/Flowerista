@@ -36,7 +36,7 @@ export default function Navbar({ brandName }) {
         <div className="pointer-events-auto flex w-[90%] items-center justify-between rounded-full border border-card-border bg-bg/70 backdrop-blur-md px-5 py-3 shadow-[var(--shadow-card)]">
           <Link href="/" aria-label={brandName} className="shrink-0">
             <Image
-              src="/icon.png"
+              src="/icon.jpg"
               alt={brandName}
               width={36}
               height={36}

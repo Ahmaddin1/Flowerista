@@ -1,9 +1,9 @@
+import ConditionalLayout from "@/components/ConditionalLayout";
 import { Cormorant, DM_Sans } from "next/font/google";
+import SmoothScroll from "@/components/SmoothScroll";
+import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
 import "./globals.css";
-import ConditionalLayout from "@/components/ConditionalLayout";
-import { Toaster } from "@/components/ui/sonner";
-import SmoothScroll from "@/components/SmoothScroll";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
