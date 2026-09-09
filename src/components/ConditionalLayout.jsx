@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"
 import Navbar from "@/components/Navbar"
 import CartBubble from "@/components/CartBubble"
 import ScrollToTop from "@/components/ScrollToTop"
+import BottomNav from "@/components/BottomNav"
 import Footer from "@/components/Footer"
 import { brandName } from "@/lib/constants"
 
@@ -20,7 +21,8 @@ export default function ConditionalLayout({ children }) {
       <Navbar brandName={brandName} />
       <CartBubble />
       <ScrollToTop />
-      <main className="flex-1">{children}</main>
+      <BottomNav />
+      <main className="flex-1 pb-28 md:pb-0">{children}</main>
       <Footer />
     </>
   )

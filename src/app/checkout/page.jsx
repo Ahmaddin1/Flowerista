@@ -12,6 +12,7 @@ import {
   Minus,
   Plus,
 } from "lucide-react";
+import { CheckoutBackButton } from "@/components/BackButton";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -42,7 +43,8 @@ const BASE_INPUT_CLASS =
   "w-full rounded-lg border bg-bg px-4 py-3 text-[14px] text-text outline-none transition-colors placeholder:text-muted-text focus:border-accent scroll-mt-24";
 const LABEL_CLASS =
   "mb-1 block text-[10px] uppercase tracking-[2px] text-muted-text";
-const SECTION_TITLE_CLASS = "mb-4 font-heading text-[20px] leading-tight text-text";
+const SECTION_TITLE_CLASS =
+  "mb-4 font-heading text-[20px] leading-tight text-text";
 
 function joinClasses(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -850,7 +852,8 @@ export default function CheckoutPage() {
 
       if (!response.ok || data?.success === false) {
         const outOfStockSummary =
-          Array.isArray(data?.outOfStockItems) && data.outOfStockItems.length > 0
+          Array.isArray(data?.outOfStockItems) &&
+          data.outOfStockItems.length > 0
             ? ` ${data.outOfStockItems
                 .map((item) => item?.productName)
                 .filter(Boolean)
@@ -891,6 +894,9 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-bg text-text">
+      <div className="top-15 left-5">
+        <CheckoutBackButton />
+      </div>
       <form onSubmit={handleSubmit} noValidate>
         <div className="mx-auto max-w-7xl px-4 pb-28 md:px-6 md:pb-0">
           <div className="md:grid md:grid-cols-[minmax(0,1.38fr)_minmax(360px,1fr)] md:items-start md:gap-8">
@@ -964,7 +970,10 @@ export default function CheckoutPage() {
                         type="checkbox"
                         checked={formValues.emailOffers}
                         onChange={(event) =>
-                          updateFormCheckbox("emailOffers", event.target.checked)
+                          updateFormCheckbox(
+                            "emailOffers",
+                            event.target.checked,
+                          )
                         }
                         className="h-4 w-4 rounded border border-card-border bg-bg accent-[var(--color-accent)]"
                       />
@@ -1097,7 +1106,9 @@ export default function CheckoutPage() {
                       <span
                         className={joinClasses(
                           "text-sm font-semibold",
-                          shippingCost === 0 ? "text-accent-strong" : "text-text",
+                          shippingCost === 0
+                            ? "text-accent-strong"
+                            : "text-text",
                         )}
                       >
                         {shippingCost === 0
@@ -1167,13 +1178,15 @@ export default function CheckoutPage() {
                           <span className="text-muted-text">IBAN No:</span> —
                         </p>
                         <p>
-                          <span className="text-muted-text">Account Title:</span>{" "}
+                          <span className="text-muted-text">
+                            Account Title:
+                          </span>{" "}
                           Flowerista
                         </p>
                         <p className="text-muted-text">
                           After completing the transfer, please share a
-                          screenshot of the payment along with your ORDER ID with
-                          our support team.
+                          screenshot of the payment along with your ORDER ID
+                          with our support team.
                         </p>
                       </div>
                     </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { LoaderCircle, Minus, Plus, ShoppingCart } from "lucide-react";
+import { CartBackButton } from "@/components/BackButton";
 import { toast } from "sonner";
 import { gsap } from "gsap";
 
@@ -115,27 +116,14 @@ function CartItemRow({ item, onQuantityChange, onRemove }) {
           )}
         </div>
 
-        <div className="flex min-w-0 flex-1 items-start justify-between gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 md:flex-row md:items-start md:justify-between md:gap-4">
           <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-3 lg:block">
-              <h2 className="text-sm font-semibold leading-tight text-text">
-                {item.productName ?? item.name}
-              </h2>
-
-              <div className="shrink-0 text-right lg:hidden">
-                <p className="text-sm font-medium text-text">
-                  Rs.{formatPrice(item.price)}
-                </p>
-                {item.originalPrice ? (
-                  <p className="text-xs text-muted-text line-through">
-                    Rs.{formatPrice(item.originalPrice)}
-                  </p>
-                ) : null}
-              </div>
-            </div>
+            <h2 className="text-sm font-semibold leading-tight text-text">
+              {item.productName ?? item.name}
+            </h2>
           </div>
 
-          <div className="hidden w-28 shrink-0 text-right lg:block">
+          <div className="hidden w-28 shrink-0 text-right md:block">
             <p className="text-sm font-medium text-text">
               Rs.{formatPrice(item.price)}
             </p>
@@ -146,7 +134,17 @@ function CartItemRow({ item, onQuantityChange, onRemove }) {
             ) : null}
           </div>
 
-          <div className="flex shrink-0 flex-col items-end gap-1">
+          <div className="flex shrink-0 flex-col items-start gap-1 md:items-end">
+            <div className="md:hidden">
+              <p className="text-sm font-medium text-text">
+                Rs.{formatPrice(item.price)}
+              </p>
+              {item.originalPrice ? (
+                <p className="text-xs text-muted-text line-through">
+                  Rs.{formatPrice(item.originalPrice)}
+                </p>
+              ) : null}
+            </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -681,6 +679,7 @@ export default function CartPage() {
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-bg overflow-y-auto overflow-x-hidden">
+        <CartBackButton />
         <div className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-4 pt-8 pb-28 text-center sm:px-6 lg:px-8 lg:pb-0">
           <div ref={emptyStateRef} className="flex flex-col items-center gap-4">
             <ShoppingCart ref={emptyCartIconRef} size={48} className="text-muted-text" />
@@ -701,6 +700,7 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-bg overflow-y-auto overflow-x-hidden">
+      <CartBackButton />
       <div className="mx-auto max-w-7xl px-4 pt-24 pb-28 sm:px-6 lg:px-8 lg:pb-0">
         <div className="flex items-baseline justify-between pb-4">
           <div className="flex items-baseline gap-2">
@@ -722,9 +722,9 @@ export default function CartPage() {
             <Link
               ref={headingLinkRef}
               href="/products"
-              className="text-sm uppercase tracking-widest text-text transition-colors hover:text-accent"
+              className="inline-flex items-center text-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-widest text-text-on-accent transition-all duration-300 hover:translate-y-[-10px] hover:shadow-[var(--shadow-card-hover)] active:scale-90"
             >
-              Shop All
+              All Products
             </Link>
           </div>
         </div>
@@ -854,7 +854,7 @@ export default function CartPage() {
         </div>
       </div>
 
-      <div className="fixed right-0 bottom-0 left-0 z-50 border-t border-card-border bg-bg px-4 py-4 lg:hidden">
+      <div className="fixed right-0 bottom-0 left-0 z-[60] border-t border-card-border bg-bg px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] lg:hidden">
         <button
           ref={mobileCheckoutBtnRef}
           type="button"

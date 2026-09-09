@@ -32,7 +32,7 @@ export default function Navbar({ brandName }) {
 
   return (
     <>
-      <div className="pointer-events-none sticky top-4 z-50 flex w-full justify-center md:hidden">
+      <div className="pointer-events-none sticky top-4 z-50 hidden w-full justify-center">
         <div className="pointer-events-auto flex w-[90%] items-center justify-between rounded-full border border-card-border bg-bg/70 backdrop-blur-md px-5 py-3 shadow-[var(--shadow-card)]">
           <Link href="/" aria-label={brandName} className="shrink-0">
             <Image

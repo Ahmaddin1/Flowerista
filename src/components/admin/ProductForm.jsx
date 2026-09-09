@@ -198,16 +198,13 @@ export default function ProductForm({ initialData, productId }) {
 
         {/* Slug */}
         <div>
-          <label className="block text-sm font-medium mb-1" style={labelStyle}>
-            Slug <span className="text-red-400">*</span>
-          </label>
+          <label className="block text-sm font-medium mb-1" style={labelStyle}>Slug <span className='text-sm text-gray-500'>(Auto-generated)</span></label>
           <input
             type="text"
             value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            required
-            className="w-full px-3 py-2 rounded-md focus:outline-none"
-            style={inputStyle}
+            readOnly
+            className="w-full px-3 py-2 rounded-md focus:outline-none cursor-default"
+            style={{ ...inputStyle, opacity: 0.6 }}
           />
         </div>
 
