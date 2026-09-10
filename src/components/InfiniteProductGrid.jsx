@@ -134,7 +134,7 @@ export default function InfiniteProductGrid({
 
     if (!uninitializedCards.length) return;
 
-    gsap.set(uninitializedCards, { opacity: 0, scale: 0.94, y: 16 });
+    gsap.set(uninitializedCards, { opacity: 0, scale: 0.94, y: 25 });
 
     uninitializedCards.forEach((el) =>
       el.setAttribute("data-gsap-init", "true"),
