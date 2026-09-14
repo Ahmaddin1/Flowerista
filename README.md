@@ -157,3 +157,49 @@ Before going live, double check:
 - `NEXT_PUBLIC_SITE_URL` matches the real production domain (affects sitemap/metadata correctness)
 - `robots.js` / `sitemap.js` are generating URLs against the production domain
 - The shipping cost constant in `lib/constants.js` reflects the final confirmed rate, not a placeholder
+
+---
+
+## Checkout Validation & Security
+
+Checkout input is validated at two **independent** layers with a strict trust boundary between them. Both layers import their format rules from a single source of truth — `src/lib/checkoutValidation.js` — so the client and server can never silently drift apart.
+
+### Layer 1 — Client-side (presentation only)
+
+`src/app/checkout/page.jsx` validates five fields (first name, last name, postal code, email, delivery contact number) on blur and again on submit, showing a field-specific message below each input and focusing the first invalid field. This layer exists **only** to give real customers fast, friendly feedback.
+
+> **This is not a security control.** Anything running in the browser can be bypassed (curl, Postman, or a script hitting the API directly). The client-side validation provides **zero** protection against a malicious request. The API route below re-runs every check independently and is the only place a rule is actually enforced.
+
+The other address fields (street, city, province, country) are intentionally **not** format-validated — they are free text with presence + length checks only.
+
+### Layer 2 — Server-side (the enforcement point)
+
+`src/app/api/orders/create/route.js` treats every request body as hostile. In order:
+
+1. **Rate-limit by IP** — coarse throttle on scripted submissions (`src/lib/rateLimit.js`).
+2. **Strip dangerous keys** — recursively removes any key that is `$`-prefixed, contains a `.`, or is a prototype-pollution vector (`__proto__`, `prototype`, `constructor`) from the entire body before any field is read. Neutralizes NoSQL-operator injection (e.g. `{"$gt":""}`) and prototype pollution.
+3. **Type-guard** — any field expected to be a string that arrives as an object/array is rejected outright.
+4. **Format re-validation** — the same phone / name / postal / email checks the browser runs, from the shared module.
+5. **Whitelist** — only known fields are copied into the object handed to Mongoose; the raw request body is never passed to `create()`/`find()`.
+6. **Field-by-field queries** — product lookups are built from validated primitives only, never from raw input.
+7. **Normalize** — email is lowercased/trimmed; phone is collapsed to a canonical `03XXXXXXXXX` form before storage.
+8. **Generic errors** — raw Mongoose/Mongo error text and stack traces never reach the client.
+
+Prices, availability, `isActive`, `maxQuantity`, shipping cost, and tip bounds are all re-computed/re-validated server-side against the database — client-supplied prices are ignored.
+
+### Layer 3 — Schema constraints (defense-in-depth)
+
+`src/models/Order.js` adds `maxlength` + `match` validators (using the same shared regexes) on the customer name, email, phone, WhatsApp number, and postal code, plus length caps on the free-text address fields. This ensures the database itself rejects malformed customer data arriving from **any** code path — seed scripts, migrations, or future admin tooling — not just the checkout route.
+
+### Field rules
+
+| Field | Rule |
+|---|---|
+| First / last name | Unicode letters only; spaces, hyphens, and apostrophes (`'` and `’`) allowed **between** letter groups so names like `O'Brien`, `Anne-Marie`, and `de la Cruz` pass. No digits or other symbols. Max 50 chars each. |
+| Postal code | Optional. When provided, exactly **5 digits** (Pakistan ships-to only). Revisit if international shipping is enabled. |
+| Email | `name@domain.tld` — one `@`, non-empty local part, a domain with a dot, and a letters-only TLD ≥ 2 chars. Max 254 chars. |
+| Phone | Exactly one of: `03XXXXXXXXX` (11 digits), `92XXXXXXXXXX` (12 digits), or `03XX-XXXXXXX` (single dash after the 4th digit). Spaces, `+`, extra dashes, and wrong digit counts are rejected. Stored canonicalized to `03XXXXXXXXX`. |
+
+### Rate-limiter deployment note
+
+`src/lib/rateLimit.js` is an in-memory, fixed-window limiter. It works as a speed bump on a **single** long-lived Node instance (e.g. `next start` on one server) but does **not** coordinate across multiple instances or serverless invocations. If you deploy to a multi-instance/serverless platform, replace the in-memory map with a shared store (Redis / Upstash / `@vercel/kv`) exposing the same `rateLimit(key, opts)` check.

@@ -433,12 +433,11 @@ export default function CartPage() {
     const headingEls = [
       headingH1Ref.current,
       headingCountRef.current,
-      headingLinkRef.current,
     ].filter(Boolean);
 
     tl.fromTo(
       headingEls,
-      { y: 30, autoAlpha: 0 },
+      { y: 60, autoAlpha: 0 },
       { y: 0, autoAlpha: 1, duration: 0.825, stagger: 0.15 },
     );
 

@@ -23,7 +23,8 @@ export const metadata = {
     default: "Flowerista",
     template: "%s | Flowerista",
   },
-  description: "Handmade crochet and pipecleaner art, made with love in Pakistan.",
+  description:
+    "Handmade crochet and pipecleaner art, made with love in Pakistan.",
   keywords: [
     "Flowerista",
     "Flowerista Pakistan",
@@ -117,4 +118,3 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-

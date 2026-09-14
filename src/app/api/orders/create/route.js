@@ -1,21 +1,93 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
-import sanitize from "mongo-sanitize";
 import dbConnect from "@/lib/db";
 import { MAX_TIP, MIN_TIP, SHIPPING_COST, ORDER_ID_PREFIX } from "@/lib/constants";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
+import {
+  isValidName,
+  isValidEmail,
+  isValidPhone,
+  isValidPostalCode,
+  normalizeEmail,
+  canonicalizePhone,
+  VALIDATION_MESSAGES,
+  NAME_MAX_LENGTH,
+  EMAIL_MAX_LENGTH,
+  PHONE_MAX_LENGTH,
+  POSTAL_CODE_MAX_LENGTH,
+} from "@/lib/checkoutValidation";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 // ---------------------------------------------------------------------------
-// Order creation (spec 7.1) — rebuilt for Flowerista.
-// No variants, no quantity-based stock. Server-side re-validation is limited
-// to: product exists + isActive, price matches the live basePrice, and
-// quantity <= maxQuantity. Shipping is the flat SHIPPING_COST on every order.
-// Removed vs. SM Drips: size/color/colorHex, stock decrement + rollback,
-// inStock sync, VALID_SHIPPING_COSTS.
+// Order creation (spec 7.1) — rebuilt for Flowerista, hardened at the trust
+// boundary. This route assumes EVERY request body is hostile and that the
+// checkout UI was never involved: a client can POST anything here directly.
+//
+// Defense layers, in order:
+//   1. Rate-limit by IP (blunt scripted-submission abuse).
+//   2. Strip dangerous keys ($-prefixed, dotted, prototype) from the whole body
+//      before it is read — blocks NoSQL-operator / prototype-pollution payloads.
+//   3. Strict type-guards: any expected-string field that arrives as an object
+//      or array is rejected outright (stops `{"$gt":""}`-style injection).
+//   4. Re-run the SAME format checks the browser runs, from the shared
+//      @/lib/checkoutValidation module (phone / name / postal / email).
+//   5. Whitelist: only known fields are copied into the object handed to
+//      Mongoose — the raw body is NEVER passed to create()/find().
+//   6. Queries are built field-by-field from validated primitives only.
+//   7. Normalize before storing (lowercase email, canonical phone).
+//   8. Generic 500s: raw Mongoose/Mongo errors and stack traces never reach
+//      the client.
+//
+// No variants, no quantity-based stock. Price/availability are re-validated
+// server-side against the DB. Shipping is the flat SHIPPING_COST on every order.
 // ---------------------------------------------------------------------------
 
 const VALID_PAYMENT_METHODS = new Set(["cod", "bank_deposit"]);
+
+// Address sub-field caps (defense-in-depth; mirrors the Order schema). The
+// four format-validated fields use the shared length constants instead.
+const STREET_MAX_LENGTH = 300;
+const CITY_MAX_LENGTH = 100;
+const PROVINCE_MAX_LENGTH = 100;
+const COUNTRY_MAX_LENGTH = 100;
+
+// Rate-limit config for this endpoint: max submissions per IP per window.
+const ORDER_RATE_LIMIT = { limit: 8, windowMs: 60_000 };
+
+// Recursively remove keys that could carry a Mongo operator ("$..."), a dotted
+// path ("a.b"), or a prototype-pollution vector. Runs on the ENTIRE parsed body
+// before any field is read. Returns a cleaned copy; primitives pass through.
+const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
+
+function stripDangerousKeys(value) {
+  if (Array.isArray(value)) {
+    return value.map((entry) => stripDangerousKeys(entry));
+  }
+
+  if (value && typeof value === "object") {
+    const cleaned = {};
+
+    for (const [key, entry] of Object.entries(value)) {
+      if (key.startsWith("$") || key.includes(".") || FORBIDDEN_KEYS.has(key)) {
+        continue; // drop the key entirely — do not store, do not process
+      }
+
+      cleaned[key] = stripDangerousKeys(entry);
+    }
+
+    return cleaned;
+  }
+
+  return value;
+}
+
+// True only for an actual string primitive. Objects/arrays/numbers where a
+// string is expected must be rejected — this is what stops an attacker from
+// smuggling a query object (e.g. `{"$gt":""}`) in place of a scalar field.
+function isPlainString(value) {
+  return typeof value === "string";
+}
 
 function badRequest(message, extra = {}) {
   return NextResponse.json(
@@ -80,98 +152,84 @@ function getPrimaryImageUrl(images) {
   return primaryImage?.url ?? "";
 }
 
+// Validates + whitelists the customer block. Assumes the body has already been
+// run through stripDangerousKeys(). Returns { value } — a NEW object containing
+// ONLY known fields (this is the whitelist) — or { error, field? } carrying a
+// user-facing message. The four format rules match the checkout UI exactly via
+// the shared @/lib/checkoutValidation module.
 function validateCustomer(customer) {
-  if (!customer || typeof customer !== "object") {
+  if (!customer || typeof customer !== "object" || Array.isArray(customer)) {
     return { error: "Customer details are required." };
   }
 
-  const safeFirstName = sanitize(customer.firstName);
-  const safeLastName = sanitize(customer.lastName);
-  const safeEmail = sanitize(customer.email);
-  const safePhone = sanitize(customer.phone);
-  const safeAddress = sanitize(customer.address);
-
+  // Type-guard: every expected-string field must be an actual string. Reject
+  // objects/arrays outright (blocks `{"$gt":""}`-style NoSQL injection).
   if (
-    typeof safeFirstName !== "string" ||
-    typeof safeLastName !== "string" ||
-    typeof safeEmail !== "string" ||
-    typeof safePhone !== "string" ||
-    typeof safeAddress !== "object"
+    !isPlainString(customer.firstName) ||
+    !isPlainString(customer.lastName) ||
+    !isPlainString(customer.email) ||
+    !isPlainString(customer.phone)
   ) {
-    return { error: "Invalid input types." };
+    return { error: "Invalid input." };
   }
 
-  const firstName = getTrimmedString(safeFirstName);
-  const lastName = getTrimmedString(safeLastName);
-  const email = getTrimmedString(safeEmail);
-  const phone = getTrimmedString(safePhone);
-  const address = safeAddress;
+  const address = customer.address;
 
-  if (
-    firstName.length > 100 ||
-    lastName.length > 100 ||
-    email.length > 200 ||
-    phone.length > 30
-  ) {
-    return { error: "Input exceeds allowed length." };
-  }
-
-  if (!firstName) {
-    return { error: "Customer first name is required." };
-  }
-
-  if (!lastName) {
-    return { error: "Customer last name is required." };
-  }
-
-  if (!email) {
-    return { error: "Customer email is required." };
-  }
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { error: "Customer email is invalid." };
-  }
-
-  if (!phone) {
-    return { error: "Customer phone is required." };
-  }
-
-  if (!address || typeof address !== "object") {
+  if (!address || typeof address !== "object" || Array.isArray(address)) {
     return { error: "Customer address is required." };
   }
 
-  const safeStreet = sanitize(address.street);
-  const safeCity = sanitize(address.city);
-  const safeProvince = sanitize(address.province);
-  const safePostalCode = sanitize(address.postalCode);
-  const safeCountry = sanitize(address.country);
-
   if (
-    typeof safeStreet !== "string" ||
-    typeof safeCity !== "string" ||
-    typeof safeProvince !== "string" ||
-    (safePostalCode != null && typeof safePostalCode !== "string") ||
-    (safeCountry != null && typeof safeCountry !== "string")
+    !isPlainString(address.street) ||
+    !isPlainString(address.city) ||
+    !isPlainString(address.province)
   ) {
-    return { error: "Invalid input types." };
+    return { error: "Invalid input." };
   }
 
-  const street = getTrimmedString(safeStreet);
-  const city = getTrimmedString(safeCity);
-  const province = getTrimmedString(safeProvince);
-  const postalCode = getTrimmedString(safePostalCode);
-  const country = getTrimmedString(safeCountry) || "Pakistan";
-
-  if (
-    street.length > 300 ||
-    city.length > 100 ||
-    province.length > 100 ||
-    postalCode.length > 20 ||
-    country.length > 100
-  ) {
-    return { error: "Input exceeds allowed length." };
+  // postalCode + country are optional; when present they must be strings.
+  if (address.postalCode != null && !isPlainString(address.postalCode)) {
+    return { error: "Invalid input." };
   }
 
+  if (address.country != null && !isPlainString(address.country)) {
+    return { error: "Invalid input." };
+  }
+
+  const firstName = customer.firstName.trim();
+  const lastName = customer.lastName.trim();
+  const rawEmail = customer.email.trim();
+  const rawPhone = customer.phone.trim();
+  const street = address.street.trim();
+  const city = address.city.trim();
+  const province = address.province.trim();
+  const postalCode = (address.postalCode ?? "").trim();
+  const country = (address.country ?? "").trim() || "Pakistan";
+
+  // Format checks — identical rules to the checkout UI, each returning the same
+  // field-specific message the client shows. (isValid* also enforce max length.)
+  if (!isValidName(firstName)) {
+    return { error: VALIDATION_MESSAGES.name, field: "firstName" };
+  }
+
+  if (!isValidName(lastName)) {
+    return { error: VALIDATION_MESSAGES.name, field: "lastName" };
+  }
+
+  if (!isValidEmail(rawEmail)) {
+    return { error: VALIDATION_MESSAGES.email, field: "email" };
+  }
+
+  if (!isValidPhone(rawPhone)) {
+    return { error: VALIDATION_MESSAGES.phone, field: "phone" };
+  }
+
+  // Optional; when provided it must be exactly 5 digits.
+  if (!isValidPostalCode(postalCode)) {
+    return { error: VALIDATION_MESSAGES.postalCode, field: "postalCode" };
+  }
+
+  // Presence-only required fields (no format constraint, matching the UI).
   if (!street) {
     return { error: "Customer street address is required." };
   }
@@ -184,12 +242,25 @@ function validateCustomer(customer) {
     return { error: "Customer province is required." };
   }
 
+  // Length caps for the free-text address fields (the format validators above
+  // already cap name/email/phone/postal). Defense-in-depth vs. huge payloads.
+  if (
+    street.length > STREET_MAX_LENGTH ||
+    city.length > CITY_MAX_LENGTH ||
+    province.length > PROVINCE_MAX_LENGTH ||
+    country.length > COUNTRY_MAX_LENGTH
+  ) {
+    return { error: "Invalid input." };
+  }
+
+  // Normalize before returning (lowercase email, canonical 03XXXXXXXXX phone).
+  // Only these known fields survive — nothing else from the request is kept.
   return {
     value: {
       firstName,
       lastName,
-      email,
-      phone,
+      email: normalizeEmail(rawEmail),
+      phone: canonicalizePhone(rawPhone),
       address: {
         street,
         city,
@@ -215,27 +286,25 @@ function validateItems(items) {
       return { error: `Item ${index + 1} is invalid.` };
     }
 
-    const safeProductId = sanitize(item.productId);
-    const safeProductName = sanitize(item.productName);
-    const safeSku = sanitize(item.sku);
-    const safeSlug = sanitize(item.slug);
-    const safeImage = sanitize(item.image);
-
+    // Type-guard each expected-string field. The body was already run through
+    // stripDangerousKeys() upstream, so no operator keys survive; here we only
+    // need to reject non-string types. Required: productId, productName, image.
+    // Optional: sku, slug.
     if (
-      typeof safeProductId !== "string" ||
-      typeof safeProductName !== "string" ||
-      (safeSku != null && typeof safeSku !== "string") ||
-      (safeSlug != null && typeof safeSlug !== "string") ||
-      typeof safeImage !== "string"
+      !isPlainString(item.productId) ||
+      !isPlainString(item.productName) ||
+      (item.sku != null && !isPlainString(item.sku)) ||
+      (item.slug != null && !isPlainString(item.slug)) ||
+      !isPlainString(item.image)
     ) {
       return { error: `Item ${index + 1} has invalid input types.` };
     }
 
-    const productId = getTrimmedString(safeProductId);
-    const productName = getTrimmedString(safeProductName);
-    const sku = getTrimmedString(safeSku);
-    const slug = getTrimmedString(safeSlug);
-    const image = getTrimmedString(safeImage);
+    const productId = getTrimmedString(item.productId);
+    const productName = getTrimmedString(item.productName);
+    const sku = getTrimmedString(item.sku);
+    const slug = getTrimmedString(item.slug);
+    const image = getTrimmedString(item.image);
     const price = getNonNegativeNumber(item.price);
     const originalPrice =
       item.originalPrice == null
@@ -313,6 +382,23 @@ async function createOrderWithUniqueId(orderPayload) {
 
 export async function POST(request) {
   try {
+    // (1) Rate-limit by IP first — throttled requests never touch the DB.
+    const clientIp = getClientIp(request);
+    const limit = rateLimit(clientIp, ORDER_RATE_LIMIT);
+
+    if (!limit.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Too many requests. Please try again shortly.",
+        },
+        {
+          status: 429,
+          headers: { "Retry-After": String(limit.retryAfterSeconds) },
+        },
+      );
+    }
+
     await dbConnect();
 
     let body;
@@ -323,19 +409,27 @@ export async function POST(request) {
       return badRequest("Invalid request body.");
     }
 
-    const customerValidation = validateCustomer(body?.customer);
+    // (2) Strip $-prefixed / dotted / prototype keys from the ENTIRE body before
+    // any field is read — neutralizes NoSQL-operator and prototype-pollution
+    // payloads no matter how deeply nested. Everything downstream reads safeBody.
+    const safeBody = stripDangerousKeys(body);
+
+    const customerValidation = validateCustomer(safeBody?.customer);
 
     if (customerValidation.error) {
-      return badRequest(customerValidation.error);
+      return badRequest(
+        customerValidation.error,
+        customerValidation.field ? { field: customerValidation.field } : {},
+      );
     }
 
-    const itemsValidation = validateItems(body?.items);
+    const itemsValidation = validateItems(safeBody?.items);
 
     if (itemsValidation.error) {
       return badRequest(itemsValidation.error);
     }
 
-    const paymentMethod = getTrimmedString(body?.paymentMethod);
+    const paymentMethod = getTrimmedString(safeBody?.paymentMethod);
 
     if (!VALID_PAYMENT_METHODS.has(paymentMethod)) {
       return badRequest("Invalid payment method.");
@@ -344,7 +438,7 @@ export async function POST(request) {
     // Shipping is authoritative server-side: flat SHIPPING_COST on every order,
     // never trusted from the client (spec 7.2). Tip is clamped to [MIN, MAX].
     const shippingCost = SHIPPING_COST;
-    const tip = clampTip(body?.tip);
+    const tip = clampTip(safeBody?.tip);
 
     const customer = customerValidation.value;
     const requestItems = itemsValidation.value;

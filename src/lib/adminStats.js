@@ -157,7 +157,7 @@ export async function getRecentOrders(limit = 10) {
     await connectDB();
     
     const orders = await Order.find()
-      .select('_id customer.name customer.email totalAmount paymentMethod orderStatus createdAt')
+      .select('_id orderId customer.name customer.email totalAmount paymentMethod orderStatus createdAt')
       .sort({ createdAt: -1 })
       .limit(limit)
       .lean();

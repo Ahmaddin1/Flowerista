@@ -2,15 +2,23 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, ShoppingBag, X } from "lucide-react";
+import {
+  Home,
+  Info,
+  LayoutGrid,
+  Menu,
+  ShoppingBag,
+  ShoppingCart,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCartCount } from "@/lib/cart";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/products", label: "Shop All" },
-  { href: "/collections", label: "Collections" },
-  { href: "/about", label: "About" },
+  { href: "/", label: "Home", icon: Home },
+  { href: "/products", label: "Shop All", icon: ShoppingBag },
+  { href: "/collections", label: "Collections", icon: LayoutGrid },
+  { href: "/about", label: "About", icon: Info },
 ];
 
 export default function Navbar({ brandName }) {
@@ -50,7 +58,7 @@ export default function Navbar({ brandName }) {
               aria-label="Open cart"
               className="relative flex h-8 w-8 items-center justify-center rounded-full bg-accent text-text-on-accent"
             >
-              <ShoppingBag className="h-4 w-4" strokeWidth={1.8} />
+              <ShoppingCart className="h-4 w-4" strokeWidth={1.8} />
               {cartCount > 0 ? (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent-strong text-[9px] font-bold text-text-on-accent">
                   {cartCount}
@@ -83,15 +91,20 @@ export default function Navbar({ brandName }) {
           </Link>
 
           <nav className="absolute left-1/2 flex -translate-x-1/2 items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="text-[11px] uppercase tracking-[2px] text-text transition-colors duration-200 hover:text-accent-strong"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="flex items-center gap-1.5 text-[11px] uppercase tracking-[2px] text-text transition-colors duration-200 hover:text-accent-strong"
+                >
+                  <Icon className="h-3.5 w-3.5" strokeWidth={1.8} />
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <Link
@@ -99,7 +112,7 @@ export default function Navbar({ brandName }) {
             aria-label="Open cart"
             className="relative ml-auto flex h-9 w-9 items-center justify-center rounded-full bg-accent text-text-on-accent"
           >
-            <ShoppingBag className="h-4 w-4" strokeWidth={1.8} />
+            <ShoppingCart className="h-4 w-4" strokeWidth={1.8} />
             {cartCount > 0 ? (
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent-strong text-[9px] font-bold text-text-on-accent">
                 {cartCount}
@@ -135,16 +148,21 @@ export default function Navbar({ brandName }) {
         </div>
 
         <nav className="flex flex-col gap-6 px-6 pt-4">
-          {navLinks.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              onClick={() => setDrawerOpen(false)}
-              className="text-[13px] uppercase tracking-[2px] text-text transition-colors duration-200 hover:text-accent-strong"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+
+            return (
+              <Link
+                key={link.label}
+                href={link.href}
+                onClick={() => setDrawerOpen(false)}
+                className="flex items-center gap-2 text-[13px] uppercase tracking-[2px] text-text transition-colors duration-200 hover:text-accent-strong"
+              >
+                <Icon className="h-4 w-4" strokeWidth={1.8} />
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
       </div>
     </>

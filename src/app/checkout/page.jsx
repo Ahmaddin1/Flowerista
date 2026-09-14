@@ -17,6 +17,48 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MAX_TIP, MIN_TIP, SHIPPING_COST } from "@/lib/constants";
+import {
+  getFieldErrorMessage,
+  EMAIL_MAX_LENGTH,
+  NAME_MAX_LENGTH,
+  PHONE_MAX_LENGTH,
+  POSTAL_CODE_MAX_LENGTH,
+} from "@/lib/checkoutValidation";
+
+// ---------------------------------------------------------------------------
+// ⚠️ CLIENT-SIDE VALIDATION IS PRESENTATION ONLY — NOT A SECURITY BOUNDARY.
+// The format checks below (First Name, Last Name, Postal Code, Email, Delivery
+// Contact Number) exist to give real customers fast, friendly feedback. They
+// provide ZERO protection against a client that bypasses the browser (curl,
+// Postman, a script POSTing straight to /api/orders/create). The order API
+// route MUST — and does — independently re-enforce the exact same rules from
+// the shared @/lib/checkoutValidation module on every request, treating the
+// body as hostile. Never rely on anything in this file for trust decisions.
+//
+// The five fields validated here are, by design, the ONLY ones with format
+// constraints. Street Address, Apartment, City, Country/Region and Province are
+// intentionally left unconstrained (presence-only where required).
+// ---------------------------------------------------------------------------
+
+// Fields that get client-side FORMAT validation (blur + submit). Everything
+// else is either presence-only (required) or entirely optional.
+const FORMAT_VALIDATED_FIELDS = new Set([
+  "email",
+  "firstName",
+  "lastName",
+  "postalCode",
+  "phoneNumber",
+]);
+
+// Returns a user-facing error string ("" when valid) for one of the format-
+// validated fields. Trimming happens inside the shared helper.
+function getCheckoutFieldError(fieldName, value) {
+  if (!FORMAT_VALIDATED_FIELDS.has(fieldName)) {
+    return "";
+  }
+
+  return getFieldErrorMessage(fieldName, value);
+}
 
 // export const metadata = {
 //   title: "Checkout",
@@ -91,16 +133,27 @@ function InputField({
   name,
   value,
   onChange,
+  onBlur,
   type = "text",
   placeholder = "",
   error = false,
+  errorMessage,
   helperText,
   fieldRef,
   autoComplete,
+  inputMode,
+  maxLength,
   min,
   max,
   step,
 }) {
+  const hasError = Boolean(error);
+  const describedById = errorMessage
+    ? `${name}-error`
+    : helperText
+      ? `${name}-helper`
+      : undefined;
+
   return (
     <div>
       <label htmlFor={name} className={LABEL_CLASS}>
@@ -115,17 +168,29 @@ function InputField({
         min={min}
         max={max}
         step={step}
+        inputMode={inputMode}
+        maxLength={maxLength}
         autoComplete={autoComplete}
         placeholder={placeholder}
-        aria-invalid={error}
+        aria-invalid={hasError}
+        aria-describedby={describedById}
         onChange={(event) => onChange(name, event.target.value)}
+        onBlur={
+          onBlur ? (event) => onBlur(name, event.target.value) : undefined
+        }
         className={joinClasses(
           BASE_INPUT_CLASS,
-          error ? "border-red-500" : "border-card-border",
+          hasError ? "border-red-500" : "border-card-border",
         )}
       />
-      {helperText ? (
-        <p className="mt-2 text-xs leading-5 text-muted-text">{helperText}</p>
+      {errorMessage ? (
+        <p id={`${name}-error`} className="mt-2 text-xs leading-5 text-red-500">
+          {errorMessage}
+        </p>
+      ) : helperText ? (
+        <p id={`${name}-helper`} className="mt-2 text-xs leading-5 text-muted-text">
+          {helperText}
+        </p>
       ) : null}
     </div>
   );
@@ -479,7 +544,40 @@ export default function CheckoutPage() {
       [name]: value,
     }));
 
+    // Validate-on-blur, not on every keystroke: while typing we NEVER raise a
+    // new error, but we DO clear an existing one the moment the field becomes
+    // valid again (per the "clear as soon as valid" rule).
+    if (FORMAT_VALIDATED_FIELDS.has(name)) {
+      setFieldErrors((current) => {
+        if (!current[name]) {
+          return current;
+        }
+
+        if (getCheckoutFieldError(name, value)) {
+          return current; // still invalid — leave the error until blur/submit
+        }
+
+        return { ...current, [name]: false };
+      });
+      return;
+    }
+
     clearFieldError(name);
+  }
+
+  // Blur is where a NEW format error is first shown for the five validated
+  // fields — so the customer isn't nagged mid-typing.
+  function handleFieldBlur(name, value) {
+    if (!FORMAT_VALIDATED_FIELDS.has(name)) {
+      return;
+    }
+
+    const message = getCheckoutFieldError(name, value);
+
+    setFieldErrors((current) => ({
+      ...current,
+      [name]: message || false,
+    }));
   }
 
   function updateFormCheckbox(name, checked) {
@@ -764,23 +862,37 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Re-validate everything on submit. The five format-validated fields run
+    // the shared format check (which also catches "empty" for the required
+    // ones); the remaining required fields are presence-only and intentionally
+    // carry no format constraints. Order mirrors the on-screen field order so
+    // the first invalid field we focus is the topmost one.
     const nextErrors = {};
-    const requiredFields = [
-      ["email", formValues.email.trim()],
-      ["firstName", formValues.firstName.trim()],
-      ["lastName", formValues.lastName.trim()],
-      ["streetAddress", formValues.streetAddress.trim()],
-      ["city", formValues.city.trim()],
-      ["province", formValues.province.trim()],
-      ["phoneNumber", formValues.phoneNumber.trim()],
-      ["paymentMethod", paymentMethod.trim()],
-    ];
-
     let firstInvalidField = null;
 
-    requiredFields.forEach(([fieldName, fieldValue]) => {
-      if (!fieldValue) {
-        nextErrors[fieldName] = true;
+    const submitChecks = [
+      ["email", getCheckoutFieldError("email", formValues.email)],
+      ["firstName", getCheckoutFieldError("firstName", formValues.firstName)],
+      ["lastName", getCheckoutFieldError("lastName", formValues.lastName)],
+      ["streetAddress", formValues.streetAddress.trim() ? "" : true],
+      ["city", formValues.city.trim() ? "" : true],
+      [
+        "postalCode",
+        getCheckoutFieldError("postalCode", formValues.postalCode),
+      ],
+      ["province", formValues.province.trim() ? "" : true],
+      [
+        "phoneNumber",
+        getCheckoutFieldError("phoneNumber", formValues.phoneNumber),
+      ],
+      ["paymentMethod", paymentMethod.trim() ? "" : true],
+    ];
+
+    submitChecks.forEach(([fieldName, result]) => {
+      if (result) {
+        // `result` is either a specific message string (format-validated
+        // fields) or `true` (presence-only fields).
+        nextErrors[fieldName] = result;
 
         if (!firstInvalidField) {
           firstInvalidField = fieldName;
@@ -792,7 +904,7 @@ export default function CheckoutPage() {
 
     if (firstInvalidField) {
       toast.error(
-        "Please fill out all required fields before placing your order.",
+        "Please fix the highlighted fields before placing your order.",
       );
 
       const firstField = fieldRefs.current[firstInvalidField];
@@ -957,12 +1069,20 @@ export default function CheckoutPage() {
                       label="Email"
                       name="email"
                       type="email"
-                      placeholder="Email or mobile phone number"
+                      placeholder="you@example.com"
                       value={formValues.email}
                       onChange={updateFormValue}
-                      error={fieldErrors.email}
+                      onBlur={handleFieldBlur}
+                      error={Boolean(fieldErrors.email)}
+                      errorMessage={
+                        typeof fieldErrors.email === "string"
+                          ? fieldErrors.email
+                          : undefined
+                      }
                       fieldRef={setFieldRef("email")}
                       autoComplete="email"
+                      inputMode="email"
+                      maxLength={EMAIL_MAX_LENGTH}
                     />
 
                     <label className="flex items-center gap-3 text-sm text-text">
@@ -1003,18 +1123,32 @@ export default function CheckoutPage() {
                         name="firstName"
                         value={formValues.firstName}
                         onChange={updateFormValue}
-                        error={fieldErrors.firstName}
+                        onBlur={handleFieldBlur}
+                        error={Boolean(fieldErrors.firstName)}
+                        errorMessage={
+                          typeof fieldErrors.firstName === "string"
+                            ? fieldErrors.firstName
+                            : undefined
+                        }
                         fieldRef={setFieldRef("firstName")}
                         autoComplete="given-name"
+                        maxLength={NAME_MAX_LENGTH}
                       />
                       <InputField
                         label="Last Name"
                         name="lastName"
                         value={formValues.lastName}
                         onChange={updateFormValue}
-                        error={fieldErrors.lastName}
+                        onBlur={handleFieldBlur}
+                        error={Boolean(fieldErrors.lastName)}
+                        errorMessage={
+                          typeof fieldErrors.lastName === "string"
+                            ? fieldErrors.lastName
+                            : undefined
+                        }
                         fieldRef={setFieldRef("lastName")}
                         autoComplete="family-name"
+                        maxLength={NAME_MAX_LENGTH}
                       />
                     </div>
 
@@ -1051,7 +1185,17 @@ export default function CheckoutPage() {
                         name="postalCode"
                         value={formValues.postalCode}
                         onChange={updateFormValue}
+                        onBlur={handleFieldBlur}
+                        error={Boolean(fieldErrors.postalCode)}
+                        errorMessage={
+                          typeof fieldErrors.postalCode === "string"
+                            ? fieldErrors.postalCode
+                            : undefined
+                        }
+                        fieldRef={setFieldRef("postalCode")}
                         autoComplete="postal-code"
+                        inputMode="numeric"
+                        maxLength={POSTAL_CODE_MAX_LENGTH}
                       />
                     </div>
 
@@ -1071,10 +1215,18 @@ export default function CheckoutPage() {
                       type="tel"
                       value={formValues.phoneNumber}
                       onChange={updateFormValue}
-                      error={fieldErrors.phoneNumber}
+                      onBlur={handleFieldBlur}
+                      error={Boolean(fieldErrors.phoneNumber)}
+                      errorMessage={
+                        typeof fieldErrors.phoneNumber === "string"
+                          ? fieldErrors.phoneNumber
+                          : undefined
+                      }
                       fieldRef={setFieldRef("phoneNumber")}
                       helperText="The courier will use this number for delivery."
                       autoComplete="tel"
+                      inputMode="tel"
+                      maxLength={PHONE_MAX_LENGTH}
                     />
 
                     <label className="flex items-center gap-3 text-sm text-text">

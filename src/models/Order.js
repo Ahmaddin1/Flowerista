@@ -1,7 +1,33 @@
 import mongoose from "mongoose";
 import { MAX_TIP, MIN_TIP } from "@/lib/constants";
+import {
+  NAME_REGEX,
+  EMAIL_REGEX,
+  PHONE_REGEX,
+  POSTAL_CODE_REGEX,
+  NAME_MAX_LENGTH,
+  EMAIL_MAX_LENGTH,
+  PHONE_MAX_LENGTH,
+  POSTAL_CODE_MAX_LENGTH,
+} from "@/lib/checkoutValidation";
 
 const { Schema } = mongoose;
+
+// ---------------------------------------------------------------------------
+// Schema-level format constraints are DEFENSE-IN-DEPTH (PROMPT 2). The API
+// route (src/app/api/orders/create/route.js) already validates + normalizes
+// every field before write; these validators ensure the database itself
+// rejects malformed customer data arriving from ANY code path (seed scripts,
+// migrations, future admin tooling), using the SAME regexes and length limits
+// as the shared @/lib/checkoutValidation module.
+// ---------------------------------------------------------------------------
+
+// Free-text address caps mirror the API route (these fields have no format
+// rule — only a length ceiling — matching the checkout UI's presence-only rule).
+const STREET_MAX_LENGTH = 300;
+const CITY_MAX_LENGTH = 100;
+const PROVINCE_MAX_LENGTH = 100;
+const COUNTRY_MAX_LENGTH = 100;
 
 const orderAddressSchema = new Schema(
   {
@@ -9,26 +35,41 @@ const orderAddressSchema = new Schema(
       type: String,
       required: true,
       trim: true,
+      maxlength: STREET_MAX_LENGTH,
     },
     city: {
       type: String,
       required: true,
       trim: true,
+      maxlength: CITY_MAX_LENGTH,
     },
     province: {
       type: String,
       required: true,
       trim: true,
+      maxlength: PROVINCE_MAX_LENGTH,
     },
     postalCode: {
       type: String,
       trim: true,
+      maxlength: POSTAL_CODE_MAX_LENGTH,
+      // Optional field: empty/absent is allowed, but a provided value must be
+      // exactly 5 digits (same rule as the shared validator). A custom
+      // validator is used instead of `match` so an empty string is explicitly
+      // treated as valid regardless of Mongoose version behavior.
+      validate: {
+        validator(value) {
+          return value == null || value === "" || POSTAL_CODE_REGEX.test(value);
+        },
+        message: "Invalid postal code.",
+      },
     },
     country: {
       type: String,
       required: true,
       default: "Pakistan",
       trim: true,
+      maxlength: COUNTRY_MAX_LENGTH,
     },
   },
   { _id: false },
@@ -40,21 +81,34 @@ const orderCustomerSchema = new Schema(
       type: String,
       required: true,
       trim: true,
+      // Stored as "First Last"; each part is capped at NAME_MAX_LENGTH by the
+      // route, so the combined value fits in 2*NAME_MAX_LENGTH + 1 (the space).
+      // A single space is a valid NAME_REGEX separator, so the combined name
+      // still satisfies the format rule.
+      maxlength: NAME_MAX_LENGTH * 2 + 1,
+      match: [NAME_REGEX, "Invalid customer name."],
     },
     email: {
       type: String,
       required: true,
       trim: true,
+      lowercase: true,
+      maxlength: EMAIL_MAX_LENGTH,
+      match: [EMAIL_REGEX, "Invalid email address."],
     },
     phone: {
       type: String,
       required: true,
       trim: true,
+      maxlength: PHONE_MAX_LENGTH,
+      match: [PHONE_REGEX, "Invalid phone number."],
     },
     whatsappNumber: {
       type: String,
       required: true,
       trim: true,
+      maxlength: PHONE_MAX_LENGTH,
+      match: [PHONE_REGEX, "Invalid WhatsApp number."],
     },
     address: {
       type: orderAddressSchema,

@@ -11,9 +11,9 @@ export default async function ProtectedLayout({ children }) {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-x-hidden">
       <AdminSidebar />
-      <main className="ml-64 min-h-screen p-8 flex-1" style={{ backgroundColor: 'var(--admin-bg)' }}>
+      <main className="ml-16 min-h-screen p-8 flex-1 lg:ml-64" style={{ backgroundColor: 'var(--admin-bg)' }}>
         {children}
       </main>
     </div>
