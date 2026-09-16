@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import ScrollToTop from "@/components/ScrollToTop";
 import BottomNav from "@/components/BottomNav";
 import Footer from "@/components/Footer";
+import CartBubble from "@/components/CartBubble";
 import { brandName } from "@/lib/constants";
 
 export default function ConditionalLayout({ children }) {
@@ -19,6 +20,7 @@ export default function ConditionalLayout({ children }) {
       <Navbar brandName={brandName} />
       <ScrollToTop />
       <BottomNav />
+      <CartBubble />
       <main className="flex-1 pb-28 md:pb-0">{children}</main>
       <Footer />
     </>

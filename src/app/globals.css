@@ -29,7 +29,7 @@
 
   /* Soft, feminine corner rounding */
   --radius-card: 1.3rem;
-  --radius-pill: 9999px;
+  --radius-pill: 22px;
 }
 
 @theme inline {

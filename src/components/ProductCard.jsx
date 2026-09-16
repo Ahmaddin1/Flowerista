@@ -111,7 +111,7 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
               className="absolute right-2 bottom-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-accent shadow-[var(--shadow-card)] md:hidden"
             >
               <ShoppingBag
-                className="h-4 w-4 text-text-on-accent"
+                className="h-4 w-4 text-text-on-accent cursor-pointer"
                 strokeWidth={1.8}
                 aria-hidden="true"
               />

@@ -16,7 +16,7 @@ function getImageSrc(image) {
     return "";
   }
 
-  return typeof image === "string" ? image : image.url ?? "";
+  return typeof image === "string" ? image : (image.url ?? "");
 }
 
 // Per-order cap (spec 6.3). Flowerista has no stock counting — the only

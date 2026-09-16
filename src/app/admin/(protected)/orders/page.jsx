@@ -126,7 +126,12 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-5xl font-bebas" style={{ color: 'var(--admin-accent)' }}>Orders</h1>
+      <h1
+        className="text-5xl font-bebas"
+        style={{ color: "var(--admin-accent)" }}
+      >
+        Orders
+      </h1>
 
       {/* Controls */}
       <div className="flex flex-col md:flex-row gap-4 justify-between">
@@ -136,7 +141,11 @@ export default function OrdersPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 px-4 py-3 rounded-lg placeholder-gray-500 focus:outline-none"
-          style={{ backgroundColor: 'var(--admin-surface)', border: '1px solid var(--admin-border)', color: 'var(--admin-text)' }}
+          style={{
+            backgroundColor: "var(--admin-surface)",
+            border: "1px solid var(--admin-border)",
+            color: "var(--admin-text)",
+          }}
         />
 
         <div className="flex gap-2">
@@ -145,14 +154,22 @@ export default function OrdersPage() {
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
             className="px-4 py-3 rounded-lg focus:outline-none"
-            style={{ backgroundColor: 'var(--admin-surface)', border: '1px solid var(--admin-border)', color: 'var(--admin-text)' }}
+            style={{
+              backgroundColor: "var(--admin-surface)",
+              border: "1px solid var(--admin-border)",
+              color: "var(--admin-text)",
+            }}
           />
           <input
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
             className="px-4 py-3 rounded-lg focus:outline-none"
-            style={{ backgroundColor: 'var(--admin-surface)', border: '1px solid var(--admin-border)', color: 'var(--admin-text)' }}
+            style={{
+              backgroundColor: "var(--admin-surface)",
+              border: "1px solid var(--admin-border)",
+              color: "var(--admin-text)",
+            }}
           />
         </div>
       </div>
@@ -164,13 +181,15 @@ export default function OrdersPage() {
             key={tab.value}
             onClick={() => setActiveStatus(tab.value)}
             className={`px-4 py-2 rounded-lg transition-colors ${
-              activeStatus === tab.value
-                ? 'font-semibold'
-                : ''
+              activeStatus === tab.value ? "font-semibold" : ""
             }`}
             style={{
-              backgroundColor: activeStatus === tab.value ? 'var(--admin-accent)' : 'transparent',
-              color: activeStatus === tab.value ? '#fff' : 'var(--admin-text-muted)',
+              backgroundColor:
+                activeStatus === tab.value
+                  ? "var(--admin-accent)"
+                  : "transparent",
+              color:
+                activeStatus === tab.value ? "#fff" : "var(--admin-text-muted)",
             }}
           >
             {tab.label}
@@ -179,148 +198,224 @@ export default function OrdersPage() {
       </div>
 
       {/* Results Count */}
-      <div className="text-sm" style={{ color: 'var(--admin-text-muted)' }}>
+      <div className="text-sm" style={{ color: "var(--admin-text-muted)" }}>
         Showing {orders.length} of {totalCount} orders
       </div>
 
       {/* Orders Table */}
       {loading ? (
-        <div className="text-center py-12" style={{ color: 'var(--admin-text-muted)' }}>Loading...</div>
+        <div
+          className="text-center py-12"
+          style={{ color: "var(--admin-text-muted)" }}
+        >
+          Loading...
+        </div>
       ) : error ? (
         <div className="text-center py-12">
           <p className="text-red-400 mb-4">{error}</p>
           <button
             onClick={fetchOrders}
             className="px-4 py-2 rounded-lg"
-            style={{ backgroundColor: 'var(--admin-accent)', color: '#fff' }}
+            style={{ backgroundColor: "var(--admin-accent)", color: "#fff" }}
           >
             Retry
           </button>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg" style={{ backgroundColor: 'var(--admin-surface)' }}>
-          <table className="w-full">
-            <thead>
-              <tr style={{ backgroundColor: 'var(--admin-surface-low)' }}>
-                <th className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left" style={{ color: 'var(--admin-text-muted)' }}>
-                  Order ID
-                </th>
-                <th className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left" style={{ color: 'var(--admin-text-muted)' }}>
-                  Customer Name
-                </th>
-                <th className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left" style={{ color: 'var(--admin-text-muted)' }}>
-                  Phone
-                </th>
-                <th className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left" style={{ color: 'var(--admin-text-muted)' }}>
-                  Items
-                </th>
-                <th className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left" style={{ color: 'var(--admin-text-muted)' }}>
-                  Total
-                </th>
-                <th className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left" style={{ color: 'var(--admin-text-muted)' }}>
-                  Payment Method
-                </th>
-                <th className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left" style={{ color: 'var(--admin-text-muted)' }}>
-                  Payment Status
-                </th>
-                <th className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left" style={{ color: 'var(--admin-text-muted)' }}>
-                  Order Status
-                </th>
-                <th className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left" style={{ color: 'var(--admin-text-muted)' }}>
-                  Date
-                </th>
-                <th className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left" style={{ color: 'var(--admin-text-muted)' }}>
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.length === 0 ? (
-                <tr>
-                  <td colSpan="10" className="text-center py-8" style={{ color: 'var(--admin-text-muted)' }}>
-                    No orders found.
-                  </td>
+        <div className="bg-white rounded-2xl border border-gray-400/30 p-4">
+          <div
+            className="overflow-x-auto rounded-lg"
+            style={{ backgroundColor: "var(--admin-surface)" }}
+          >
+            <table className="w-full">
+              <thead>
+                <tr style={{ backgroundColor: "var(--admin-surface-low)" }}>
+                  <th
+                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                    style={{ color: "var(--admin-text-muted)" }}
+                  >
+                    Order ID
+                  </th>
+                  <th
+                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                    style={{ color: "var(--admin-text-muted)" }}
+                  >
+                    Customer Name
+                  </th>
+                  <th
+                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                    style={{ color: "var(--admin-text-muted)" }}
+                  >
+                    Phone
+                  </th>
+                  <th
+                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                    style={{ color: "var(--admin-text-muted)" }}
+                  >
+                    Items
+                  </th>
+                  <th
+                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                    style={{ color: "var(--admin-text-muted)" }}
+                  >
+                    Total
+                  </th>
+                  <th
+                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                    style={{ color: "var(--admin-text-muted)" }}
+                  >
+                    Payment Method
+                  </th>
+                  <th
+                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                    style={{ color: "var(--admin-text-muted)" }}
+                  >
+                    Payment Status
+                  </th>
+                  <th
+                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                    style={{ color: "var(--admin-text-muted)" }}
+                  >
+                    Order Status
+                  </th>
+                  <th
+                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                    style={{ color: "var(--admin-text-muted)" }}
+                  >
+                    Date
+                  </th>
+                  <th
+                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                    style={{ color: "var(--admin-text-muted)" }}
+                  >
+                    Actions
+                  </th>
                 </tr>
-              ) : (
-                orders.map((order) => (
-                  <tr key={order._id} className="border-t" style={{ borderColor: 'var(--admin-surface-low)' }}>
-                    <td className="px-4 py-4 font-mono text-sm" style={{ color: 'var(--admin-accent)' }}>
-                      {order.orderId}
-                    </td>
-                    <td className="px-4 py-4" style={{ color: 'var(--admin-text)' }}>
-                      {order.customer.name}
-                    </td>
-                    <td className="px-4 py-4" style={{ color: 'var(--admin-text)' }}>
-                      {order.customer.phone}
-                    </td>
-                    <td className="px-4 py-4" style={{ color: 'var(--admin-text)' }}>
-                      {order.items.length} items
-                    </td>
-                    <td className="px-4 py-4" style={{ color: 'var(--admin-text)' }}>
-                      {formatCurrency(order.totalAmount)}
-                    </td>
-                    <td className="px-4 py-4" style={{ color: 'var(--admin-text)' }}>
-                      {formatPaymentMethod(order.paymentMethod)}
-                    </td>
-                    <td className="px-4 py-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs ${getPaymentStatusBadge(order.paymentStatus)}`}
-                      >
-                        {order.paymentStatus}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <select
-                        value={order.orderStatus}
-                        onChange={(e) =>
-                          handleStatusChange(order._id, e.target.value)
-                        }
-                        disabled={updatingOrderId === order._id}
-                        className="px-3 py-2 rounded text-sm focus:outline-none disabled:opacity-50"
-                        style={{ backgroundColor: 'var(--admin-surface-low)', border: '1px solid var(--admin-border)', color: 'var(--admin-text)' }}
-                      >
-                        <option value="pending_confirmation">
-                          Pending Confirmation
-                        </option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                    </td>
-                    <td className="px-4 py-4" style={{ color: 'var(--admin-text)' }}>
-                      {formatDate(order.createdAt)}
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/admin/orders/${order._id}`}
-                          className="px-3 py-1 rounded text-sm"
-                          style={{ backgroundColor: 'var(--admin-surface)', color: 'var(--admin-accent)' }}
-                        >
-                          View
-                        </Link>
-                        <a
-                          href={buildWhatsAppLink({
-                            phone: order.customer.whatsappNumber,
-                            orderId: order.orderId,
-                            customerName: order.customer.name,
-                            status: order.orderStatus,
-                            items: order.items,
-                          })}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 bg-green-600 text-white rounded hover:bg-green-700"
-                        >
-                          <MessageCircle size={16} />
-                        </a>
-                      </div>
+              </thead>
+              <tbody>
+                {orders.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="10"
+                      className="text-center py-8"
+                      style={{ color: "var(--admin-text-muted)" }}
+                    >
+                      No orders found.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  orders.map((order) => (
+                    <tr
+                      key={order._id}
+                      className="border-t"
+                      style={{ borderColor: "var(--admin-surface-low)" }}
+                    >
+                      <td
+                        className="px-4 py-4 font-mono text-sm"
+                        style={{ color: "var(--admin-accent)" }}
+                      >
+                        {order.orderId}
+                      </td>
+                      <td
+                        className="px-4 py-4"
+                        style={{ color: "var(--admin-text)" }}
+                      >
+                        {order.customer.name}
+                      </td>
+                      <td
+                        className="px-4 py-4"
+                        style={{ color: "var(--admin-text)" }}
+                      >
+                        {order.customer.phone}
+                      </td>
+                      <td
+                        className="px-4 py-4"
+                        style={{ color: "var(--admin-text)" }}
+                      >
+                        {order.items.length} items
+                      </td>
+                      <td
+                        className="px-4 py-4"
+                        style={{ color: "var(--admin-text)" }}
+                      >
+                        {formatCurrency(order.totalAmount)}
+                      </td>
+                      <td
+                        className="px-4 py-4"
+                        style={{ color: "var(--admin-text)" }}
+                      >
+                        {formatPaymentMethod(order.paymentMethod)}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs ${getPaymentStatusBadge(order.paymentStatus)}`}
+                        >
+                          {order.paymentStatus}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <select
+                          value={order.orderStatus}
+                          onChange={(e) =>
+                            handleStatusChange(order._id, e.target.value)
+                          }
+                          disabled={updatingOrderId === order._id}
+                          className="px-3 py-2 rounded text-sm focus:outline-none disabled:opacity-50"
+                          style={{
+                            backgroundColor: "var(--admin-surface-low)",
+                            border: "1px solid var(--admin-border)",
+                            color: "var(--admin-text)",
+                          }}
+                        >
+                          <option value="pending_confirmation">
+                            Pending Confirmation
+                          </option>
+                          <option value="confirmed">Confirmed</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </td>
+                      <td
+                        className="px-4 py-4"
+                        style={{ color: "var(--admin-text)" }}
+                      >
+                        {formatDate(order.createdAt)}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/orders/${order._id}`}
+                            className="px-3 py-1 rounded text-sm"
+                            style={{
+                              backgroundColor: "var(--admin-surface)",
+                              color: "var(--admin-accent)",
+                            }}
+                          >
+                            View
+                          </Link>
+                          <a
+                            href={buildWhatsAppLink({
+                              phone: order.customer.whatsappNumber,
+                              orderId: order.orderId,
+                              customerName: order.customer.name,
+                              status: order.orderStatus,
+                              items: order.items,
+                            })}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 bg-green-600 text-white rounded hover:bg-green-700"
+                          >
+                            <MessageCircle size={16} />
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -331,18 +426,24 @@ export default function OrdersPage() {
             onClick={() => setCurrentPage((p) => p - 1)}
             disabled={currentPage === 1}
             className="px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: 'var(--admin-surface)', color: 'var(--admin-text)' }}
+            style={{
+              backgroundColor: "var(--admin-surface)",
+              color: "var(--admin-text)",
+            }}
           >
             Previous
           </button>
-          <span style={{ color: 'var(--admin-text)' }}>
+          <span style={{ color: "var(--admin-text)" }}>
             Page {currentPage} of {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage((p) => p + 1)}
             disabled={currentPage === totalPages}
             className="px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: 'var(--admin-surface)', color: 'var(--admin-text)' }}
+            style={{
+              backgroundColor: "var(--admin-surface)",
+              color: "var(--admin-text)",
+            }}
           >
             Next
           </button>

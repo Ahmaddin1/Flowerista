@@ -229,190 +229,192 @@ export default function ProductsPage() {
           </button>
         </div>
       ) : (
-        <div
-          className="rounded-lg overflow-hidden"
-          style={{ backgroundColor: "var(--admin-surface)" }}
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr style={{ backgroundColor: "var(--admin-surface-low)" }}>
-                  <th
-                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
-                    style={{ color: "var(--admin-text-muted)" }}
-                  >
-                    Image
-                  </th>
-                  <th
-                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
-                    style={{ color: "var(--admin-text-muted)" }}
-                  >
-                    Name
-                  </th>
-                  <th
-                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
-                    style={{ color: "var(--admin-text-muted)" }}
-                  >
-                    Category
-                  </th>
-                  <th
-                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
-                    style={{ color: "var(--admin-text-muted)" }}
-                  >
-                    Base Price
-                  </th>
-                  <th
-                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
-                    style={{ color: "var(--admin-text-muted)" }}
-                  >
-                    Status
-                  </th>
-                  <th
-                    className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
-                    style={{ color: "var(--admin-text-muted)" }}
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="6"
-                      className="text-center py-8"
+        <div className="bg-white rounded-2xl border border-gray-400/30 p-4 ">
+          <div
+            className="rounded-lg overflow-hidden"
+            style={{ backgroundColor: "var(--admin-surface)" }}
+          >
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr style={{ backgroundColor: "var(--admin-surface-low)" }}>
+                    <th
+                      className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
                       style={{ color: "var(--admin-text-muted)" }}
                     >
-                      No products found.
-                    </td>
-                  </tr>
-                ) : (
-                  products.map((product) => (
-                    <tr
-                      key={product._id}
-                      className="border-t"
-                      style={{ borderColor: "var(--admin-border)" }}
+                      Image
+                    </th>
+                    <th
+                      className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                      style={{ color: "var(--admin-text-muted)" }}
                     >
-                      <td className="px-4 py-4">
-                        {product.images && product.images.length > 0 ? (
-                          <img
-                            src={
-                              typeof product.images[0] === "string"
-                                ? product.images[0]
-                                : product.images[0].url
-                            }
-                            alt={product.name}
-                            className="w-10 h-10 object-cover rounded"
-                          />
-                        ) : (
-                          <div
-                            className="w-10 h-10 rounded"
-                            style={{ backgroundColor: "var(--admin-border)" }}
-                          />
-                        )}
-                      </td>
+                      Name
+                    </th>
+                    <th
+                      className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                      style={{ color: "var(--admin-text-muted)" }}
+                    >
+                      Category
+                    </th>
+                    <th
+                      className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                      style={{ color: "var(--admin-text-muted)" }}
+                    >
+                      Base Price
+                    </th>
+                    <th
+                      className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                      style={{ color: "var(--admin-text-muted)" }}
+                    >
+                      Status
+                    </th>
+                    <th
+                      className="text-[11px] uppercase tracking-[2px] px-4 py-3 text-left"
+                      style={{ color: "var(--admin-text-muted)" }}
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.length === 0 ? (
+                    <tr>
                       <td
-                        className="px-4 py-4"
-                        style={{ color: "var(--admin-text)" }}
+                        colSpan="6"
+                        className="text-center py-8"
+                        style={{ color: "var(--admin-text-muted)" }}
                       >
-                        {product.name}
-                      </td>
-                      <td
-                        className="px-4 py-4"
-                        style={{ color: "var(--admin-text)" }}
-                      >
-                        {product.category?.name || product.category || "N/A"}
-                      </td>
-                      <td
-                        className="px-4 py-4"
-                        style={{ color: "var(--admin-text)" }}
-                      >
-                        {formatPrice(product.basePrice)}
-                      </td>
-                      <td className="px-4 py-4">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs ${
-                            product.isActive
-                              ? "bg-green-600/70 text-white"
-                              : "bg-red-600/70 text-white"
-                          }`}
-                        >
-                          {product.isActive ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        {deletingId === product._id ? (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleDelete(product._id)}
-                              className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-                            >
-                              Confirm
-                            </button>
-                            <button
-                              onClick={() => setDeletingId(null)}
-                              className="px-3 py-1 rounded text-sm"
-                              style={{
-                                backgroundColor: "var(--admin-surface)",
-                                border: "1px solid var(--admin-border)",
-                                color: "var(--admin-text)",
-                              }}
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() =>
-                                router.push(
-                                  `/admin/products/${product._id}/edit`,
-                                )
-                              }
-                              className="px-3 py-1 rounded text-sm"
-                              style={{
-                                backgroundColor: "var(--admin-surface)",
-                                border: "1px solid var(--admin-border)",
-                                color: "var(--admin-text)",
-                              }}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleToggleActive(
-                                  product._id,
-                                  product.isActive,
-                                )
-                              }
-                              disabled={togglingId === product._id}
-                              className="px-3 py-1 rounded text-sm disabled:opacity-50"
-                              style={{
-                                backgroundColor: "var(--admin-surface)",
-                                border: "1px solid var(--admin-border)",
-                                color: "var(--admin-text)",
-                              }}
-                            >
-                              {togglingId === product._id
-                                ? "..."
-                                : product.isActive
-                                  ? "Deactivate"
-                                  : "Activate"}
-                            </button>
-                            <button
-                              onClick={() => setDeletingId(product._id)}
-                              className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
+                        No products found.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    products.map((product) => (
+                      <tr
+                        key={product._id}
+                        className="border-t"
+                        style={{ borderColor: "var(--admin-surface-low)" }}
+                      >
+                        <td className="px-4 py-4">
+                          {product.images && product.images.length > 0 ? (
+                            <img
+                              src={
+                                typeof product.images[0] === "string"
+                                  ? product.images[0]
+                                  : product.images[0].url
+                              }
+                              alt={product.name}
+                              className="w-10 h-10 object-cover rounded"
+                            />
+                          ) : (
+                            <div
+                              className="w-10 h-10 rounded"
+                              style={{ backgroundColor: "var(--admin-border)" }}
+                            />
+                          )}
+                        </td>
+                        <td
+                          className="px-4 py-4"
+                          style={{ color: "var(--admin-text)" }}
+                        >
+                          {product.name}
+                        </td>
+                        <td
+                          className="px-4 py-4"
+                          style={{ color: "var(--admin-text)" }}
+                        >
+                          {product.category?.name || product.category || "N/A"}
+                        </td>
+                        <td
+                          className="px-4 py-4"
+                          style={{ color: "var(--admin-text)" }}
+                        >
+                          {formatPrice(product.basePrice)}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs ${
+                              product.isActive
+                                ? "bg-green-600/70 text-white"
+                                : "bg-red-600/70 text-white"
+                            }`}
+                          >
+                            {product.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          {deletingId === product._id ? (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleDelete(product._id)}
+                                className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                              >
+                                Confirm
+                              </button>
+                              <button
+                                onClick={() => setDeletingId(null)}
+                                className="px-3 py-1 rounded text-sm"
+                                style={{
+                                  backgroundColor: "var(--admin-surface)",
+                                  border: "1px solid var(--admin-border)",
+                                  color: "var(--admin-text)",
+                                }}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() =>
+                                  router.push(
+                                    `/admin/products/${product._id}/edit`,
+                                  )
+                                }
+                                className="px-3 py-1 rounded text-sm"
+                                style={{
+                                  backgroundColor: "var(--admin-surface)",
+                                  border: "1px solid var(--admin-border)",
+                                  color: "var(--admin-text)",
+                                }}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleToggleActive(
+                                    product._id,
+                                    product.isActive,
+                                  )
+                                }
+                                disabled={togglingId === product._id}
+                                className="px-3 py-1 rounded text-sm disabled:opacity-50"
+                                style={{
+                                  backgroundColor: "var(--admin-surface)",
+                                  border: "1px solid var(--admin-border)",
+                                  color: "var(--admin-text)",
+                                }}
+                              >
+                                {togglingId === product._id
+                                  ? "..."
+                                  : product.isActive
+                                    ? "Deactivate"
+                                    : "Activate"}
+                              </button>
+                              <button
+                                onClick={() => setDeletingId(product._id)}
+                                className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

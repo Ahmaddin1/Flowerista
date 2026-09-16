@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import gsap from "gsap";
@@ -11,17 +11,16 @@ import {
   Settings,
   LogOut,
   Home,
-  ChevronLeft,
   PanelLeftClose,
 } from "lucide-react";
 
 const EXPANDED_WIDTH = 256; // w-64
 const COLLAPSED_WIDTH = 80; // w-20
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ isOpen, onToggle }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [collapsed, setCollapsed] = useState(false);
+  const collapsed = !isOpen;
 
   const asideRef = useRef(null);
   const labelRefs = useRef([]); // all text nodes (title, link labels, logout label)
@@ -98,7 +97,7 @@ export default function AdminSidebar() {
   return (
     <aside
       ref={asideRef}
-      className="fixed left-0 top-0 h-screen flex flex-col overflow-hidden"
+      className={`fixed left-0 top-0 z-50 flex h-screen flex-col overflow-hidden transition-transform duration-300 lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       style={{
         width: EXPANDED_WIDTH,
         backgroundColor: "var(--admin-bg)",
@@ -117,7 +116,7 @@ export default function AdminSidebar() {
 
         {/* Collapse toggle */}
         <button
-          onClick={() => setCollapsed((c) => !c)}
+          onClick={onToggle}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="absolute right-3 top-4 z-10 flex items-center justify-center w-9 h-9 rounded-full transition-colors hover:bg-[var(--admin-accent)] hover:text-white"
           style={{

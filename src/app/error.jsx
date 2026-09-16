@@ -13,7 +13,7 @@ export default function Error({ error, reset }) {
         Something went wrong
       </h1>
       <p className="text-sm text-muted-text text-center max-w-sm">
-        An unexpected error occurred. Please try again.
+        Couldn't Connect to the Server. Check Your Internet Connection and Try Again.
       </p>
       <button
         onClick={reset}
