@@ -17,7 +17,6 @@ import {
   PHONE_MAX_LENGTH,
   POSTAL_CODE_MAX_LENGTH,
 } from "@/lib/checkoutValidation";
-import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 // ---------------------------------------------------------------------------
 // Order creation (spec 7.1) — rebuilt for Flowerista, hardened at the trust
