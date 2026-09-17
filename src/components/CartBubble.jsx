@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import CartModal from "@/components/CartModal";
 import { getCartCount } from "@/lib/cart";
 import { useCartStore } from "@/store/cartStore";
@@ -57,15 +57,15 @@ export default function CartBubble() {
       {shouldHideBubble ? null : (
         <div
           ref={bubbleRef}
-          className="fixed bottom-8 right-[88px] z-50"
+          className="fixed bottom-44 right-6 z-50 md:bottom-24"
           style={{ opacity: 0 }}
         >
           <button
             type="button"
             onClick={() => router.push("/cart")}
-            className="relative flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-accent shadow-[var(--shadow-card)] transition-transform duration-200 hover:scale-110"
+            className="relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-accent shadow-[var(--shadow-card)] transition-transform duration-200 hover:scale-110"
           >
-            <ShoppingBag
+            <ShoppingCart
               size={22}
               className="text-text-on-accent"
               strokeWidth={1.5}

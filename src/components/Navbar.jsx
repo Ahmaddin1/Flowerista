@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Home,
   Info,
@@ -11,6 +12,7 @@ import {
   ShoppingCart,
   X,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { getCartCount } from "@/lib/cart";
 
@@ -22,8 +24,12 @@ const navLinks = [
 ];
 
 export default function Navbar({ brandName }) {
+  const pathname = usePathname();
   const [cartCount, setCartCount] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const isActive = (href) =>
+    href === "/" ? pathname === href : pathname.startsWith(href);
 
   useEffect(() => {
     const syncCartCount = () => {
@@ -93,15 +99,27 @@ export default function Navbar({ brandName }) {
           <nav className="absolute left-1/2 flex -translate-x-1/2 items-center gap-8">
             {navLinks.map((link) => {
               const Icon = link.icon;
+              const active = isActive(link.href);
 
               return (
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="flex items-center gap-1.5 text-[11px] uppercase tracking-[2px] text-text transition-colors duration-200 hover:text-accent-strong"
+                  className={`relative flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-[2px] transition-colors duration-200 ${active ? "text-text-on-accent" : "text-text hover:text-accent-strong"}`}
                 >
-                  <Icon className="h-3.5 w-3.5" strokeWidth={1.8} />
-                  {link.label}
+                  {active ? (
+                    <motion.span
+                      layoutId="desktopNavActivePill"
+                      className="absolute inset-0 -z-10 rounded-full bg-accent"
+                      transition={{
+                        type: "spring",
+                        stiffness: 350,
+                        damping: 30,
+                      }}
+                    />
+                  ) : null}
+                  <Icon className="relative h-3.5 w-3.5" strokeWidth={1.8} />
+                  <span className="relative">{link.label}</span>
                 </Link>
               );
             })}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Plus, Minus } from "lucide-react";
+import { ArrowRight, Plus, Minus, ChevronRight } from "lucide-react";
 import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,31 +13,33 @@ const CATEGORIES = [
   {
     slug: "crochet",
     name: "Crochet",
-    image: null, // e.g. "/images/categories/crochet.jpg"
+    image:
+      "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=1600&q=80",
     alt: "Handmade crochet flowers",
   },
   {
     slug: "pipecleaner-art",
     name: "Pipecleaner Art",
-    image: null,
+    image:
+      "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=1600&q=80",
+
     alt: "Pipe cleaner floral art",
   },
 ];
 
 /* ------------------------------------------------------------------ */
-/* Geometry + motion tokens — single source of truth                   */
+/* Geometry + motion tokens                 */
 /* ------------------------------------------------------------------ */
-const OPEN = { w: "95vw", h: "45vh", scale: 1.25 };
-const CLOSED = { w: "80vw", h: "20vh", scale: 1 };
+const OPEN = { w: "99vw", h: "50vh", scale: 1.25 };
+const CLOSED = { w: "85vw", h: "20vh", scale: 1 };
 
 const DEFAULT_OPEN_INDEX = 0;
 const DURATION = 0.7;
 const EASE = "power3.inOut";
 const LABEL_DELAY = 0.05; // 100ms lag on the label when opening
-const CTA_FADE_IN = 0.3;
-const CTA_FADE_OUT = 0.15;
 
 export default function CategorySection({ id, categories = CATEGORIES }) {
+  const topLevel = categories.filter((c) => !c.parentSlug);
   const [openIndex, setOpenIndex] = useState(DEFAULT_OPEN_INDEX);
 
   const cardRefs = useRef([]);
@@ -47,6 +49,7 @@ export default function CategorySection({ id, categories = CATEGORIES }) {
   const tlRef = useRef(null);
   const plusRefs = useRef([]);
   const minusRefs = useRef([]);
+  const pillRefs = useRef([]);
 
   const handleToggle = (index) => {
     const prev = openIndex;
@@ -76,6 +79,13 @@ export default function CategorySection({ id, categories = CATEGORIES }) {
         { backgroundColor: "rgba(0,0,0,0)", color: "#000000" },
         0,
       );
+      if (pillRefs.current[prev]?.length) {
+        tl.to(
+          pillRefs.current[prev].filter(Boolean),
+          { opacity: 0, y: 50, stagger: 0.07 },
+          0,
+        );
+      }
     }
 
     /* ---- expand the newly opened panel ---- */
@@ -94,21 +104,31 @@ export default function CategorySection({ id, categories = CATEGORIES }) {
         { backgroundColor: "#e51f76", color: "#ffffff" },
         0,
       );
+      if (pillRefs.current[next]?.length) {
+        tl.to(
+          pillRefs.current[next].filter(Boolean),
+          { opacity: 1, y: 0, stagger: 0.03 },
+          labelDelay,
+        );
+      }
     }
   };
 
   return (
     <section id={id} className="scroll-mt-24">
-      {categories.length === 0 ? (
+      {topLevel.length === 0 ? (
         <p className="px-4 text-center text-[12px] uppercase tracking-[3px] text-muted-text">
           More categories coming soon.
         </p>
       ) : (
         <>
-          <div className="flex flex-col items-center gap-4 py-2">
-            {categories.map((category, i) => {
+          <div className="flex flex-col items-center gap-2 py-2">
+            {topLevel.map((category, i) => {
               const initiallyOpen = i === DEFAULT_OPEN_INDEX;
               const isOpen = i === openIndex;
+              const subcategories = categories.filter(
+                (c) => c.parentSlug === category.slug,
+              );
 
               return (
                 <div
@@ -170,7 +190,7 @@ export default function CategorySection({ id, categories = CATEGORIES }) {
                       initiallyOpen ? "h-[45vh] w-[95vw]" : "h-[20vh] w-[80vw]",
                     ].join(" ")}
                   >
-                    <p className="absolute bottom-0 left-0 max-w-[60%] p-5 text-left font-heading text-[clamp(22px,4vw,40px)] uppercase leading-[1.05] tracking-[0.08em] text-black md:max-w-[70%] md:p-8">
+                    <p className="absolute top-0 left-0 max-w-[60%] p-5 text-left font-heading text-[clamp(22px,4vw,40px)] uppercase leading-[1.05] tracking-[0.08em] text-black md:max-w-[70%] md:p-8">
                       {category.name}
                     </p>
 
@@ -193,23 +213,58 @@ export default function CategorySection({ id, categories = CATEGORIES }) {
                       />
                     </div>
 
-                    <Link
-                      ref={(el) => {
-                        ctaRefs.current[i] = el;
-                      }}
-                      href={`/products?category=${category.slug}`}
-                      className="pointer-events-auto absolute bottom-5 right-5 flex items-center gap-1 rounded-[22px] px-5 py-2.5 font-sans text-sm font-medium"
-                      style={{
-                        backgroundColor: initiallyOpen
-                          ? "var(--color-accent)"
-                          : "transparent",
-                        color: initiallyOpen
-                          ? "var(--color-text-on-accent)"
-                          : "#000000",
-                      }}
-                    >
-                      View category <ArrowRight size={16} />
-                    </Link>
+                    <div className="pointer-events-none absolute inset-x-5 bottom-5 z-20 flex flex-col items-start gap-3 md:inset-x-8 md:bottom-8">
+                      {subcategories.length > 0 && (
+                        <div
+                          className={[
+                            "flex flex-wrap gap-2",
+                            isOpen
+                              ? "pointer-events-auto"
+                              : "pointer-events-none",
+                          ].join(" ")}
+                        >
+                          {subcategories.map((sub, j) => (
+                            <Link
+                              key={sub.slug}
+                              ref={(el) => {
+                                if (!pillRefs.current[i])
+                                  pillRefs.current[i] = [];
+                                pillRefs.current[i][j] = el;
+                              }}
+                              href={`/products?category=${category.slug}&subcategory=${sub.slug}`}
+                              className="flex items-center gap-1 rounded-[22px] border border-accent/50 px-4 py-1.5 font-sans text-xs font-medium text-accent hover:bg-black/5"
+                              style={{
+                                opacity: initiallyOpen ? 1 : 0,
+                                transform: initiallyOpen
+                                  ? "translateY(0px)"
+                                  : "translateY(12px)",
+                              }}
+                            >
+                              <div className="flex items-center justify-center">
+                                {" "}
+                                {sub.name} <ChevronRight size={16} />
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+
+                      <Link
+                        ref={(el) => {
+                          ctaRefs.current[i] = el;
+                        }}
+                        href={`/products?category=${category.slug}`}
+                        className="pointer-events-auto flex items-center gap-1 self-end rounded-[22px] px-5 py-2.5 font-sans text-sm font-medium"
+                        style={{
+                          backgroundColor: initiallyOpen
+                            ? "#e51f76"
+                            : "rgba(0,0,0,0)",
+                          color: initiallyOpen ? "#ffffff" : "#000000",
+                        }}
+                      >
+                        View category <ArrowRight size={16} />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               );

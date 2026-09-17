@@ -31,7 +31,7 @@ function ChevronIcon({ open }) {
   );
 }
 
-function Dropdown({ triggerLabel, ariaLabel, children }) {
+function Dropdown({ triggerLabel, ariaLabel, align = "right", children }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -82,7 +82,9 @@ function Dropdown({ triggerLabel, ariaLabel, children }) {
         <div
           role="listbox"
           aria-label={ariaLabel}
-          className="card-surface absolute right-0 z-20 mt-2 min-w-[220px] p-1.5"
+          className={`card-surface absolute z-20 mt-2 max-h-[min(70vh,32rem)] max-w-[calc(100vw-2rem)] min-w-[220px] w-max overflow-y-auto overflow-x-hidden p-1.5 ${
+            align === "left" ? "left-0" : "right-0"
+          }`}
         >
           {children({ close: () => setOpen(false) })}
         </div>
@@ -98,7 +100,7 @@ function OptionRow({ label, selected, indented = false, onSelect }) {
       role="option"
       aria-selected={selected}
       onClick={onSelect}
-      className={`flex w-full items-center rounded-[10px] px-3 py-2 text-left text-sm transition-colors duration-150 ${
+      className={`flex w-full items-center rounded-[15px] px-3 py-2 text-left text-sm transition-colors duration-150 ${
         indented ? "pl-7" : ""
       } ${
         selected
@@ -219,7 +221,11 @@ export default function FilterBar({
       </div>
 
       <div className="flex gap-2">
-        <Dropdown triggerLabel={categoryTriggerLabel} ariaLabel="Filter by category">
+        <Dropdown
+          triggerLabel={categoryTriggerLabel}
+          ariaLabel="Filter by category"
+          align="left"
+        >
           {({ close }) => (
             <>
               <OptionRow

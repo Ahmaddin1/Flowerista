@@ -13,6 +13,9 @@ export default function SmoothScroll({ children }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
     const lenis = new Lenis({
@@ -65,6 +68,7 @@ export default function SmoothScroll({ children }) {
     return () => {
       clearTimeout(resizeTimer);
       lenis.destroy();
+      window.history.scrollRestoration = previousScrollRestoration;
       window.removeEventListener("cartModalChange", handleCartModal);
       observer.disconnect();
       gsap.ticker.remove(ticker);
@@ -73,6 +77,10 @@ export default function SmoothScroll({ children }) {
 
   useEffect(() => {
     if (!lenisRef.current) return;
+
+    window.scrollTo(0, 0);
+    lenisRef.current.scrollTo(0, { immediate: true });
+
     const timer = setTimeout(() => {
       lenisRef.current.resize();
       ScrollTrigger.refresh();
