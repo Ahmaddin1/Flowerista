@@ -24,18 +24,17 @@ import {
 // checkout UI was never involved: a client can POST anything here directly.
 //
 // Defense layers, in order:
-//   1. Rate-limit by IP (blunt scripted-submission abuse).
-//   2. Strip dangerous keys ($-prefixed, dotted, prototype) from the whole body
+//   1. Strip dangerous keys ($-prefixed, dotted, prototype) from the whole body
 //      before it is read — blocks NoSQL-operator / prototype-pollution payloads.
-//   3. Strict type-guards: any expected-string field that arrives as an object
+//   2. Strict type-guards: any expected-string field that arrives as an object
 //      or array is rejected outright (stops `{"$gt":""}`-style injection).
-//   4. Re-run the SAME format checks the browser runs, from the shared
+//   3. Re-run the SAME format checks the browser runs, from the shared
 //      @/lib/checkoutValidation module (phone / name / postal / email).
-//   5. Whitelist: only known fields are copied into the object handed to
+//   4. Whitelist: only known fields are copied into the object handed to
 //      Mongoose — the raw body is NEVER passed to create()/find().
-//   6. Queries are built field-by-field from validated primitives only.
-//   7. Normalize before storing (lowercase email, canonical phone).
-//   8. Generic 500s: raw Mongoose/Mongo errors and stack traces never reach
+//   5. Queries are built field-by-field from validated primitives only.
+//   6. Normalize before storing (lowercase email, canonical phone).
+//   7. Generic 500s: raw Mongoose/Mongo errors and stack traces never reach
 //      the client.
 //
 // No variants, no quantity-based stock. Price/availability are re-validated
@@ -50,9 +49,6 @@ const STREET_MAX_LENGTH = 300;
 const CITY_MAX_LENGTH = 100;
 const PROVINCE_MAX_LENGTH = 100;
 const COUNTRY_MAX_LENGTH = 100;
-
-// Rate-limit config for this endpoint: max submissions per IP per window.
-const ORDER_RATE_LIMIT = { limit: 8, windowMs: 60_000 };
 
 // Recursively remove keys that could carry a Mongo operator ("$..."), a dotted
 // path ("a.b"), or a prototype-pollution vector. Runs on the ENTIRE parsed body
@@ -381,23 +377,6 @@ async function createOrderWithUniqueId(orderPayload) {
 
 export async function POST(request) {
   try {
-    // (1) Rate-limit by IP first — throttled requests never touch the DB.
-    const clientIp = getClientIp(request);
-    const limit = rateLimit(clientIp, ORDER_RATE_LIMIT);
-
-    if (!limit.allowed) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Too many requests. Please try again shortly.",
-        },
-        {
-          status: 429,
-          headers: { "Retry-After": String(limit.retryAfterSeconds) },
-        },
-      );
-    }
-
     await dbConnect();
 
     let body;
