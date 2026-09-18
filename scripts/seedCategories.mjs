@@ -17,11 +17,20 @@ config({ path: ".env.local" }); // or '.env' if that's what you use
 // has none). Slugs MUST match CATEGORY_SLUGS / SUBCATEGORY_SLUGS in
 // src/lib/constants.js.
 const CATEGORIES = [
-  { name: "Crochet", slug: "crochet", parentSlug: null, order: 1 },
+  {
+    name: "Crochet",
+    slug: "crochet",
+    parentSlug: null,
+    image:
+      "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=1600&q=80",
+    order: 1,
+  },
   {
     name: "Pipecleaner Art",
     slug: "pipecleaner-art",
     parentSlug: null,
+    image:
+      "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=1600&q=80",
     order: 2,
   },
   {

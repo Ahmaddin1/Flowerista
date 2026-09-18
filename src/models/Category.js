@@ -44,6 +44,12 @@ const categorySchema = new Schema(
       default: null,
       trim: true,
     },
+    imageMobile: {
+      type: String,
+      default: null,
+      trim: true,
+      required: false, // fallback to `image` if not provided
+    },
   },
   {
     timestamps: true,

@@ -15,7 +15,7 @@ export async function GET(request) {
   try {
     await dbConnect();
     const categories = await Category.find({})
-      .select("_id name slug parentSlug order image")
+      .select("_id name slug parentSlug order image imageMobile")
       .sort({ order: 1 })
       .lean();
     return NextResponse.json({ categories });

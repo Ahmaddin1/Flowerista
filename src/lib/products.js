@@ -157,7 +157,7 @@ export async function getCategories() {
   await dbConnect();
 
   const categories = await Category.find({})
-    .select("name slug parentSlug order image")
+    .select("name slug parentSlug order image imageMobile")
     .sort({ order: 1 })
     .lean();
 
@@ -168,5 +168,6 @@ export async function getCategories() {
     parentSlug: category.parentSlug ?? null,
     order: Number(category.order ?? 0),
     image: category.image ?? null,
+    imageMobile: category.imageMobile ?? null,
   }));
 }
