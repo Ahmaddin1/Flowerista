@@ -46,7 +46,7 @@ export default function BottomNav() {
               key={link.href}
               href={link.href}
               aria-label={link.label}
-              className="relative flex flex-col items-center justify-center gap-0.5 px-3 py-2 min-w-0"
+              className="relative flex flex-col items-center justify-center gap-0.5 px-4.5 py-3 min-w-0"
             >
               <AnimatePresence>
                 {active && (

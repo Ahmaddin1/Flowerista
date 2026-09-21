@@ -6,10 +6,15 @@ import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 
-/* ------------------------------------------------------------------ */
-/* Data — add/remove entries here. The component adapts automatically. */
-/* ------------------------------------------------------------------ */
+
 const CATEGORIES = [
+  {
+    slug: "pipecleaner-art",
+    name: "Pipecleaner Art",
+    image:
+      "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=1600&q=80",
+    alt: "Pipe cleaner floral art",
+  },
   {
     slug: "crochet",
     name: "Crochet",
@@ -17,27 +22,15 @@ const CATEGORIES = [
       "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=1600&q=80",
     alt: "Handmade crochet flowers",
   },
-  {
-    slug: "pipecleaner-art",
-    name: "Pipecleaner Art",
-    // NOTE: same URL as "crochet" above — placeholder, swap before launch.
-    image:
-      "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=1600&q=80",
-    alt: "Pipe cleaner floral art",
-  },
 ];
 
 /* ------------------------------------------------------------------ */
 /* Geometry + motion tokens
-/* The initial (pre-interaction) markup and every GSAP tween both read */
-/* from these two objects, so the resting size can never drift from    */
-/* the animated-to size again (that drift was the old bug: the initial */
-/* JSX used 95vw/45vh while these constants said 99vw/50vh).          */
 /* ------------------------------------------------------------------ */
 const OPEN = { w: "99vw", h: "50vh", scale: 1.1 };
 const CLOSED = { w: "80vw", h: "20vh", scale: 0.9 };
 
-const DEFAULT_OPEN_INDEX = 0;
+const DEFAULT_OPEN_INDEX = null;
 const DURATION = 0.7;
 const EASE = "power3.inOut";
 const LABEL_DELAY = 0.05; // 100ms-ish lag on the label when opening
@@ -149,6 +142,7 @@ export default function CategorySection({ id, categories = CATEGORIES }) {
               // if it were, React would snap the size to its final value
               // instantly on every toggle and GSAP would have nothing
               // left to animate from.
+
               const isDefaultOpen = i === DEFAULT_OPEN_INDEX;
               const isOpen = i === openIndex;
               const dims = isDefaultOpen ? OPEN : CLOSED;

@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import ProductCard from "@/components/ProductCard";
 import SkeletonCard from "@/components/SkeletonCard";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const PAGE_SIZE = 12;
 
@@ -37,22 +38,34 @@ export default function InfiniteProductGrid({
   isEmpty = false,
 }) {
   const [products, setProducts] = useState(initialProducts);
-  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialProducts.length < totalCount);
   const sentinelRef = useRef(null);
-  const requestInFlightRef = useRef(false);
+  const pageRef = useRef(1);
+  const productCountRef = useRef(initialProducts.length);
+  const totalCountRef = useRef(totalCount);
+  const hasMoreRef = useRef(initialProducts.length < totalCount);
+  const loadingRef = useRef(false);
+  const requestControllerRef = useRef(null);
+  const requestIdRef = useRef(0);
   const gridRef = useRef(null);
 
   useEffect(() => {
+    requestIdRef.current += 1;
+    requestControllerRef.current?.abort();
+    requestControllerRef.current = null;
+    loadingRef.current = false;
+    pageRef.current = 1;
+    productCountRef.current = initialProducts.length;
+    totalCountRef.current = totalCount;
+    hasMoreRef.current = initialProducts.length < totalCount;
+
     setProducts(initialProducts);
-    setPage(1);
     setHasMore(initialProducts.length < totalCount);
-    requestInFlightRef.current = false;
   }, [initialProducts, totalCount, categorySlug, subcategorySlug, sortValue]);
 
   useEffect(() => {
-    if (!sentinelRef.current || !hasMore || loading) {
+    if (isEmpty || !products.length || !sentinelRef.current) {
       return undefined;
     }
 
@@ -60,21 +73,27 @@ export default function InfiniteProductGrid({
       ([entry]) => {
         if (
           !entry?.isIntersecting ||
-          loading ||
-          !hasMore ||
-          requestInFlightRef.current
+          loadingRef.current ||
+          !hasMoreRef.current
         ) {
           return;
         }
 
-        const nextPage = page + 1;
+        const nextPage = pageRef.current + 1;
+        const requestId = requestIdRef.current;
+        const controller = new AbortController();
 
-        requestInFlightRef.current = true;
+        loadingRef.current = true;
+        requestControllerRef.current = controller;
         setLoading(true);
 
-        fetch(buildProductsUrl(categorySlug, subcategorySlug, nextPage, sortValue), {
-          cache: "no-store",
-        })
+        fetch(
+          buildProductsUrl(categorySlug, subcategorySlug, nextPage, sortValue),
+          {
+            cache: "no-store",
+            signal: controller.signal,
+          },
+        )
           .then(async (response) => {
             if (!response.ok) {
               throw new Error("Failed to fetch more products.");
@@ -83,24 +102,39 @@ export default function InfiniteProductGrid({
             return response.json();
           })
           .then((nextProducts) => {
+            if (requestId !== requestIdRef.current) return;
+
             if (!Array.isArray(nextProducts) || nextProducts.length === 0) {
+              hasMoreRef.current = false;
               setHasMore(false);
               return;
             }
+
+            const nextProductCount =
+              productCountRef.current + nextProducts.length;
 
             setProducts((currentProducts) => [
               ...currentProducts,
               ...nextProducts,
             ]);
-            setPage(nextPage);
-            setHasMore(products.length + nextProducts.length < totalCount);
+            productCountRef.current = nextProductCount;
+            pageRef.current = nextPage;
+            hasMoreRef.current = nextProductCount < totalCountRef.current;
+            setHasMore(nextProductCount < totalCountRef.current);
           })
           .catch((error) => {
+            if (requestId !== requestIdRef.current) return;
+            if (error.name === "AbortError") return;
+
             console.error(error);
+            hasMoreRef.current = false;
             setHasMore(false);
           })
           .finally(() => {
-            requestInFlightRef.current = false;
+            if (requestId !== requestIdRef.current) return;
+
+            loadingRef.current = false;
+            requestControllerRef.current = null;
             setLoading(false);
           });
       },
@@ -113,57 +147,56 @@ export default function InfiniteProductGrid({
 
     return () => {
       observer.disconnect();
+      requestControllerRef.current?.abort();
     };
   }, [
     categorySlug,
     subcategorySlug,
     sortValue,
-    hasMore,
-    loading,
-    page,
-    products.length,
-    totalCount,
+    isEmpty,
+    products.length > 0,
   ]);
 
-  useEffect(() => {
-    if (!gridRef.current) return;
+  useGSAP(
+    () => {
+      if (!gridRef.current) return;
 
-    const uninitializedCards = gridRef.current.querySelectorAll(
-      ".product-card:not([data-gsap-init])",
-    );
+      const uninitializedCards = gridRef.current.querySelectorAll(
+        ".product-card:not([data-gsap-init])",
+      );
 
-    if (!uninitializedCards.length) return;
+      if (!uninitializedCards.length) return;
 
-    gsap.set(uninitializedCards, { opacity: 0, scale: 0.94, y: 25 });
+      gsap.set(uninitializedCards, { opacity: 0, scale: 0.94, y: 25 });
 
-    uninitializedCards.forEach((el) =>
-      el.setAttribute("data-gsap-init", "true"),
-    );
+      uninitializedCards.forEach((el) =>
+        el.setAttribute("data-gsap-init", "true"),
+      );
 
-    ScrollTrigger.batch(uninitializedCards, {
-      onEnter: (batch) => {
-        gsap.to(batch, {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 0.55,
-          stagger: 0.05,
-          ease: "power2.out",
-          overwrite: true,
-        });
-      },
-      once: true,
-      start: "top 95%",
-    });
+      ScrollTrigger.batch(uninitializedCards, {
+        onEnter: (batch) => {
+          gsap.to(batch, {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.55,
+            stagger: 0.05,
+            ease: "power2.out",
+            overwrite: true,
+          });
+        },
+        once: true,
+        start: "top 95%",
+      });
 
-    ScrollTrigger.refresh();
-  }, [products.length]);
-
-  useEffect(() => {
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, []);
+      ScrollTrigger.refresh();
+    },
+    {
+      dependencies: [products.length],
+      revertOnUpdate: true,
+      scope: gridRef,
+    },
+  );
 
   if (isEmpty) {
     return (
@@ -204,7 +237,7 @@ export default function InfiniteProductGrid({
       <div ref={sentinelRef} className="h-10" aria-hidden="true" />
 
       {!hasMore && products.length > 0 ? (
-        <p className="text-center text-[11px] uppercase tracking-[3px] text-muted-text">
+        <p className="text-center text-[12px] uppercase tracking-[2px] text-muted-text">
           You&apos;ve seen it all :)
         </p>
       ) : null}

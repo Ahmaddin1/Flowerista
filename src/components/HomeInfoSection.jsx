@@ -49,19 +49,20 @@ export default function HomeInfoSection() {
     const ctx = gsap.context(() => {
       if (leftColumnRef.current) {
         gsap.set(leftColumnRef.current, {
-          x: -40,
+          y: 100,
+          opacity: 0,
           autoAlpha: 0,
         });
       }
 
       const validRightItems = rightColumnItemsRef.current.filter(Boolean);
       if (validRightItems.length > 0) {
-        gsap.set(validRightItems, { x: 40, autoAlpha: 0 });
+        gsap.set(validRightItems, { y: 100, scale: 1.5, autoAlpha: 0 });
       }
 
       const validPromoBoxes = promoBoxesRef.current.filter(Boolean);
       if (validPromoBoxes.length > 0) {
-        gsap.set(validPromoBoxes, { y: 30, autoAlpha: 0 });
+        gsap.set(validPromoBoxes, { y: 100, scale: 1.5, autoAlpha: 0 });
       }
 
       const mm = gsap.matchMedia();
@@ -70,13 +71,14 @@ export default function HomeInfoSection() {
         // Mobile: separate animations with top 90% start
         if (leftColumnRef.current) {
           gsap.to(leftColumnRef.current, {
-            x: 0,
+            y: 0,
+            opacity: 1,
             autoAlpha: 1,
-            duration: 0.9,
+            duration: 0.7,
             ease: "power2.out",
             scrollTrigger: {
               trigger: leftColumnRef.current,
-              start: "top 90%",
+              start: "top 70%",
               toggleActions: "play none none none",
             },
           });
@@ -85,9 +87,10 @@ export default function HomeInfoSection() {
         if (validRightItems.length > 0) {
           validRightItems.forEach((item) => {
             gsap.to(item, {
-              x: 0,
+              y: 0,
+              scale: 1,
               autoAlpha: 1,
-              duration: 0.9,
+              duration: 0.7,
               ease: "power2.out",
               scrollTrigger: {
                 trigger: item,
@@ -101,13 +104,14 @@ export default function HomeInfoSection() {
         if (validPromoBoxes.length > 0) {
           gsap.to(validPromoBoxes, {
             y: 0,
+            scale: 1,
             autoAlpha: 1,
             duration: 0.9,
             stagger: 0.15,
             ease: "power2.out",
             scrollTrigger: {
               trigger: validPromoBoxes[0],
-              start: "top 90%",
+              start: "top 75%",
               toggleActions: "play none none none",
             },
           });
@@ -119,14 +123,15 @@ export default function HomeInfoSection() {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: leftColumnRef.current,
-            start: "top 80%",
+            start: "top 70%",
             toggleActions: "play none none none",
           },
         });
 
         if (leftColumnRef.current) {
           tl.to(leftColumnRef.current, {
-            x: 0,
+            y: 0,
+            opacity: 1,
             autoAlpha: 1,
             duration: 0.9,
             ease: "power2.out",
@@ -137,7 +142,8 @@ export default function HomeInfoSection() {
           tl.to(
             validRightItems,
             {
-              x: 0,
+              y: 0,
+              scale: 1,
               autoAlpha: 1,
               duration: 0.9,
               stagger: 0.12,
@@ -152,6 +158,7 @@ export default function HomeInfoSection() {
             validPromoBoxes,
             {
               y: 0,
+              scale: 1,
               autoAlpha: 1,
               duration: 0.9,
               stagger: 0.15,
@@ -200,7 +207,9 @@ export default function HomeInfoSection() {
             Crafted with care, made for you.
           </h2>
           <p className="mb-4 text-sm leading-relaxed text-muted-text">
-            Every piece at Flowerista is made by hand — from soft crochet creations to intricate pipe-cleaner art. No two pieces are exactly alike.
+            Every piece at Flowerista is made by hand — from soft crochet
+            creations to intricate pipe-cleaner art. No two pieces are exactly
+            alike.
           </p>
           <p className="text-sm leading-relaxed text-muted-text">
             Questions?{" "}
@@ -228,9 +237,7 @@ export default function HomeInfoSection() {
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
                 className="flex w-full items-center justify-between px-4 py-4 text-left"
               >
-                <span className="text-sm font-medium text-text">
-                  {faq.q}
-                </span>
+                <span className="text-sm font-medium text-text">{faq.q}</span>
                 <span className="text-lg text-text">
                   {openIndex === index ? "−" : "+"}
                 </span>
@@ -257,10 +264,10 @@ export default function HomeInfoSection() {
             }}
             className="flex flex-col items-center justify-center text-center py-14 px-8 border border-card-border rounded-lg bg-card"
           >
-            <p className="text-sm font-bold text-text">
-              Flat-rate shipping
+            <p className="text-sm font-bold text-text">Flat-rate shipping</p>
+            <p className="text-xs text-muted-text">
+              on every order, nationwide
             </p>
-            <p className="text-xs text-muted-text">on every order, nationwide</p>
           </div>
           <div
             ref={(el) => {
@@ -269,7 +276,9 @@ export default function HomeInfoSection() {
             className="flex flex-col items-center justify-center text-center py-14 px-8 border border-card-border rounded-lg bg-card"
           >
             <p className="text-sm font-bold text-text">Handmade to order</p>
-            <p className="text-xs text-muted-text">every piece made with care</p>
+            <p className="text-xs text-muted-text">
+              every piece made with care
+            </p>
           </div>
         </div>
       </div>

@@ -89,7 +89,7 @@ export default function Hero4() {
           { opacity: 1, y: 0, duration: 1.0, ease: "power2.out" },
           0.3,
         )
-        .to(brandRef.current, { duration: 0.9 })
+        .to(brandRef.current, { duration: 0.6 })
         .to(brandRef.current, {
           opacity: 0,
           y: -40,
@@ -173,13 +173,13 @@ export default function Hero4() {
           <div className="hero-cta-row flex flex-wrap justify-center gap-3 opacity-0">
             <Link
               href="/products"
-              className="rounded-full bg-accent px-6 py-3 text-[11px] font-bold uppercase tracking-[2px] text-text-on-accent transition-all duration-300 hover:-translate-y-[6px] hover:bg-accent-strong active:scale-95"
+              className="rounded-[16px] text-center bg-accent px-6 py-3 text-[11px] font-bold uppercase tracking-[2px] text-text-on-accent transition-all duration-300 hover:-translate-y-[6px] hover:bg-accent-strong active:scale-95"
             >
               Shop Now
             </Link>
             <Link
               href="#categories"
-              className="rounded-full border border-card-border bg-transparent px-6 py-3 text-[11px] uppercase tracking-[2px] text-text transition-all duration-300 hover:border-accent hover:text-accent"
+              className="rounded-[16px] text-center border border-card-border bg-transparent px-6 py-3 text-[11px] uppercase tracking-[2px] text-text transition-all duration-300 hover:border-accent hover:text-accent"
             >
               Explore Categories
             </Link>

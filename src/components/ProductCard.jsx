@@ -40,7 +40,8 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
     normalizedOriginalPrice > normalizedPrice;
   const discountPercentage = hasDiscount
     ? Math.round(
-        ((normalizedOriginalPrice - normalizedPrice) / normalizedOriginalPrice) *
+        ((normalizedOriginalPrice - normalizedPrice) /
+          normalizedOriginalPrice) *
           100,
       )
     : null;
@@ -91,7 +92,7 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
         )}
 
         {hasDiscount && !isOutOfStock ? (
-          <span className="absolute top-2 left-2 rounded-pill bg-accent px-2 py-1 text-[10px] font-bold uppercase tracking-[2px] text-text">
+          <span className="absolute top-2 left-2 rounded-pill bg-accent px-2 py-1 text-[10px] font-bold uppercase tracking-[2px] text-text-on-accent">
             -{discountPercentage}%
           </span>
         ) : null}
