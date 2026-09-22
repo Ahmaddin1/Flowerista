@@ -109,9 +109,10 @@ export default function HomeInfoSection() {
             duration: 0.9,
             stagger: 0.15,
             ease: "power2.out",
+
             scrollTrigger: {
               trigger: validPromoBoxes[0],
-              start: "top 75%",
+              start: "top 65%",
               toggleActions: "play none none none",
             },
           });

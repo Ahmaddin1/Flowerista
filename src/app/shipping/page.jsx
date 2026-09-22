@@ -9,7 +9,7 @@ const rawNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? ''
 const waNumber = rawNumber.startsWith('0') ? '92' + rawNumber.slice(1) : rawNumber
 
 export const metadata = {
-  title: 'Shipping Policy | Flowerista',
+  title: 'Shipping Policy',
   description:
     'Learn about Flowerista shipping charges, delivery timeframes, and how we handle damaged or incorrect orders across Pakistan.',
 }

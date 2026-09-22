@@ -7,7 +7,7 @@ const rawNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? ''
 const waNumber = rawNumber.startsWith('0') ? '92' + rawNumber.slice(1) : rawNumber
 
 export const metadata = {
-  title: 'Return & Exchange Policy | Flowerista',
+  title: 'Return & Exchange Policy',
   description:
     'Read the Flowerista return and exchange policy for handmade crochet and pipecleaner art pieces.',
 }

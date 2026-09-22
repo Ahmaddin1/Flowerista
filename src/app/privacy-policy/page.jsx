@@ -6,7 +6,7 @@
 const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'hello@flowerista.pk'
 
 export const metadata = {
-  title: 'Privacy Policy | Flowerista',
+  title: 'Privacy Policy',
   description: 'Read the Flowerista privacy policy to understand how we collect, use, and protect your personal information.',
 }
 

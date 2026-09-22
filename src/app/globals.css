@@ -78,10 +78,7 @@
 
 /* --------------------------------------------------------------------------
    shadcn/ui token layer (kept intact). Used by sonner's <Toaster/> and the
-   admin surfaces, which stay on the dark theme until the Phase 8 admin retheme.
-   The Flowerista brand tokens above intentionally OWN the `accent` and `card`
-   color utilities (bg-accent / bg-card), so those two lines are removed from
-   the @theme inline block rather than pointing back at these shadcn vars.
+   admin surfaces.
    -------------------------------------------------------------------------- */
 :root {
   --background: oklch(1 0 0);

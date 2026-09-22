@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'About Us | Flowerista',
+  title: 'About Us',
   description:
     'Flowerista is a Pakistani handmade-goods brand crafting crochet pieces and pipecleaner art — made with care, designed for the girly at heart.',
 }

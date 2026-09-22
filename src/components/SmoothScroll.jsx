@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
-import Lenis from "lenis";
-import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import Lenis from "lenis";
 
 gsap.registerPlugin(ScrollTrigger);
 
