@@ -1,33 +1,19 @@
-// ---------------------------------------------------------------------------
-// Flowerista — central constants
-// Single source of truth for brand values, tip caps, shipping, ID prefixes,
-// and the confirmed category taxonomy. Nothing here reuses SM Drips' values.
-// ---------------------------------------------------------------------------
-
 // Brand ------------------------------------------------------------------
 export const brandName = "Flowerista";
+export const tagline = "HANDMADE FLOWERS FOR THE GIRLIES 💅";
 
-// ⚠️ CLIENT REVIEW: confirm this tagline is final before launch.
-export const tagline = "Handmade for the girly at heart";
-
-// Tips (spec 6.6) --------------------------------------------------------
-// SM Drips' MAX_TIP of 20,000 does NOT carry over.
+// Tips --------------------------------------------------------
 export const MIN_TIP = 0;
 export const MAX_TIP = 5000;
 
-// Shipping (spec 6.6, 7.2, 9) -------------------------------------------
-// Flat value applied to EVERY order regardless of subtotal — no free-shipping
-// threshold (SM Drips' "free above Rs. 3,000" rule is removed). Defined ONCE
-// here and imported everywhere (order validation, WhatsApp, checkout UI).
-// TODO: confirm real shipping cost
+// Shipping -------------------------------------------
 export const SHIPPING_COST = 350;
 
-// ID prefixes (spec 6.2) -------------------------------------------------
-// Flowerista-specific. Must NOT reuse SM Drips' "SM-" (SKU) / "SRT-" (order).
+// ID prefixes -------------------------------------------------
 export const SKU_PREFIX = "FLW";
 export const ORDER_ID_PREFIX = "FLW";
 
-// Category taxonomy (spec 3, 6.1) — FINAL, complete list for launch -------
+// Category taxonomy-------
 export const CATEGORY_SLUGS = {
   CROCHET: "crochet",
   PIPECLEANER_ART: "pipecleaner-art",
@@ -62,12 +48,7 @@ export const CATEGORY_LABELS = {
   [SUBCATEGORY_SLUGS.FLOWER_BOUQUETS]: "Flower Bouquets",
 };
 
-// maxQuantity per-order caps (spec 6.3) — PROVISIONAL placeholders, not
-// derived from real production-capacity data.
-//   - Smaller/faster items (Flower Baskets, Flower Bouquets): 5
-//   - Larger/slower items (Name/Decorative Wall Hangings): 3
-// Crochet has no subcategory; the spec doesn't state a default for it, so it
-// falls through to the general default of 5 (FLAG: confirm crochet cap).
+// maxQuantity per-order caps — PROVISIONAL placeholders.
 export const MAX_QUANTITY_DEFAULT = 5;
 export const MAX_QUANTITY_LARGE_ITEM = 3;
 

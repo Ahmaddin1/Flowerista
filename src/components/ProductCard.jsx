@@ -67,11 +67,8 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
   return (
     <article
       ref={ref}
-      role="link"
-      tabIndex={0}
-      onClick={handleNavigate}
-      onKeyDown={handleKeyDown}
-      className="product-card card-surface group cursor-pointer p-2 transition-all duration-300 hover:-translate-y-2.5 hover:border-accent hover:shadow-[var(--shadow-card-hover)]"
+      href={slug && categorySlug ? `/products/${categorySlug}/${slug}` : "#"}
+      className="product-card card-surface group block cursor-pointer p-2 transition-all duration-300 hover:-translate-y-2.5 hover:border-accent hover:shadow-[var(--shadow-card-hover)]"
     >
       <div className="relative aspect-3/4 overflow-hidden rounded-[12px]">
         {imageSrc ? (
