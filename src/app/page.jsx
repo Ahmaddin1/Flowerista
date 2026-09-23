@@ -8,16 +8,44 @@ import { getCategories, getProducts } from "@/lib/products";
 export const metadata = {
   title: "Flowerista | Handmade Crochet & Pipe-Cleaner Art",
   description:
-    "Handmade crochet creations and pipe-cleaner art, crafted with love. Shop unique, one-of-a-kind pieces from Flowerista.",
+    "Handmade crochet creations and pipe-cleaner art for home decor and gifts, crafted with love. Shop unique, one-of-a-kind decorative and beautiful items from Flowerista.",
   keywords: [
-    "crochet",
-    "pipe cleaner art",
-    "handmade",
-    "flowerista",
-    "flower bouquet",
-    "wall hanging",
-    "handmade gifts",
-    "Pakistan",
+    "Flowerista",
+    "Flowerista Pakistan",
+    "handmade crochet Pakistan",
+    "flowers",
+    "gifts for girls",
+    "crochet flowers",
+    "pipecleaner art",
+    "pipe cleaner flowers",
+    "handmade flower bouquets",
+    "flower baskets",
+    "name wall hangings",
+    "decorative wall hangings",
+    "handmade gifts Pakistan",
+    "custom handmade decor",
+    "artisan home decor Pakistan",
+    "crochet items",
+    "crochet decor",
+    "home decor",
+    "crochet flowers Pakistan",
+    "home decor items",
+    "gift items",
+    "crochet gifts",
+    "crochet items for home",
+    "crochet wall decor",
+    "crochet wall art",
+    "home decor flowers",
+    "crochet wall hangings",
+    "handmade wall hangings",
+    "wall hangings",
+    "keychains",
+    "crochet keychains",
+    "flower keychains",
+    "cute keychains",
+    "pipecleaner keychains",
+    "home decor lamps",
+    "beautiful home decor art",
   ],
   openGraph: {
     title: "Flowerista | Handmade Crochet & Pipe-Cleaner Art",
@@ -54,7 +82,10 @@ export default async function HomePage() {
       </div>
 
       <div className="space-y-20">
-        <section id="categories" className="px-4 py-20 text-center scroll-mt-24">
+        <section
+          id="categories"
+          className="px-4 py-20 text-center scroll-mt-24"
+        >
           <h2 className="font-heading text-[48px] leading-none text-text">
             Shop by Category
           </h2>
