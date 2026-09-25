@@ -16,7 +16,7 @@ export default function AdminShell({ children }) {
   const toggleSidebar = () => setSidebarOpen((open) => !open);
 
   return (
-    <div className="flex min-h-screen overflow-x-hidden">
+    <div className="flex min-h-screen">
       <AdminSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
       {sidebarOpen && (
@@ -40,12 +40,12 @@ export default function AdminShell({ children }) {
             border: "1px solid var(--admin-border)",
           }}
         >
-          <PanelLeftOpen size={18} />
+          <PanelLeftOpen size={20} />
         </button>
       )}
 
       <main
-        className={`min-h-screen flex-1 p-8 transition-[margin] duration-300 ${sidebarOpen ? "lg:ml-64" : "lg:ml-20"}`}
+        className={`min-h-screen min-w-0 flex-1 p-2 transition-[margin] duration-300 ${sidebarOpen ? "lg:ml-64" : "lg:ml-15"}`}
         style={{ backgroundColor: "var(--admin-bg)" }}
       >
         {children}

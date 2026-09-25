@@ -138,7 +138,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className=" ml-5 space-y-6">
       <div className="flex justify-between items-center">
         <h1
           className="text-5xl font-bebas"

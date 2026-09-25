@@ -79,13 +79,13 @@ export default function AdminSidebar({ isOpen, onToggle }) {
       tl.to(asideRef.current, {
         width: EXPANDED_WIDTH,
         duration: 0.3,
-        ease: "power2.inOut",
+        ease: "power3.inOut",
       }).to(
         labelRefs.current,
         {
           opacity: 1,
           duration: 0.2,
-          ease: "power1.in",
+          ease: "power2.in",
         },
         "-=0.1",
       );

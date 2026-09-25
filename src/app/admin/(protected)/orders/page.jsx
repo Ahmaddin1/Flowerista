@@ -125,7 +125,7 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 ml-5">
       <h1
         className="text-5xl font-bebas"
         style={{ color: "var(--admin-accent)" }}
@@ -134,13 +134,13 @@ export default function OrdersPage() {
       </h1>
 
       {/* Controls */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between">
+      <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <input
           type="text"
           placeholder="Search by Order ID, name, phone"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-4 py-3 rounded-lg placeholder-gray-500 focus:outline-none"
+          className="w-full min-w-0 flex-1 px-4 py-3 rounded-lg placeholder-gray-500 focus:outline-none"
           style={{
             backgroundColor: "var(--admin-surface)",
             border: "1px solid var(--admin-border)",
@@ -148,12 +148,12 @@ export default function OrdersPage() {
           }}
         />
 
-        <div className="flex gap-2">
+        <div className="flex w-full min-w-0 flex-col gap-2 lg:w-auto lg:flex-row">
           <input
             type="date"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
-            className="px-4 py-3 rounded-lg focus:outline-none"
+            className="w-full min-w-0 px-4 py-3 rounded-lg focus:outline-none lg:w-auto"
             style={{
               backgroundColor: "var(--admin-surface)",
               border: "1px solid var(--admin-border)",
@@ -164,7 +164,7 @@ export default function OrdersPage() {
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
-            className="px-4 py-3 rounded-lg focus:outline-none"
+            className="w-full min-w-0 px-4 py-3 rounded-lg focus:outline-none lg:w-auto"
             style={{
               backgroundColor: "var(--admin-surface)",
               border: "1px solid var(--admin-border)",
@@ -222,12 +222,12 @@ export default function OrdersPage() {
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-400/30 p-4">
+        <div className="min-w-0 max-w-full bg-white rounded-2xl border border-gray-400/30 p-4">
           <div
-            className="overflow-x-auto rounded-lg"
+            className="w-full max-w-full overflow-x-auto rounded-lg"
             style={{ backgroundColor: "var(--admin-surface)" }}
           >
-            <table className="w-full">
+            <table className="orders-table w-full min-w-[1100px]">
               <thead>
                 <tr style={{ backgroundColor: "var(--admin-surface-low)" }}>
                   <th

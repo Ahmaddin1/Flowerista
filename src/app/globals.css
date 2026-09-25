@@ -203,6 +203,18 @@
   --admin-accent-hover: #a81054; /* matches --color-accent-strong */
 }
 
+@media (max-width: 1023px) {
+  .orders-table th:nth-child(odd),
+  .orders-table td:nth-child(odd) {
+    background-color: #ffffff !important;
+  }
+
+  .orders-table th:nth-child(even),
+  .orders-table td:nth-child(even) {
+    background-color: #f3f5f7 !important;
+  }
+}
+
 /* Custom text selection color — brand accent highlight */
 ::selection {
   background-color: var(--color-accent);
